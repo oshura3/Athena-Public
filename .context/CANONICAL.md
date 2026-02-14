@@ -146,7 +146,7 @@ graph TD
 | **GraphRAG Communities** | 1,460 | — |
 | **Knowledge Graph** | 46MB + 78MB vectors | — |
 
-> **What's in this repo?** This is a **curated starter pack** — the best protocols, scripts, and case studies handpicked from my private implementation. Think of it as a "greatest hits" to get you started. Your own instance will grow to match (or exceed) the private repo as you use it.
+> **What's in this repo?** This is a **comprehensive reference implementation — 200+ protocols, 118 scripts, 48 workflows, and templates drawn from 1,079+ production sessions. Think of it as a complete toolkit to build your own persistent AI system.
 
 > *Pattern*: Every friction ➡️ Protocol. Every failure ➡️ Case Study.
 
@@ -451,7 +451,7 @@ Think of it like **Git, but for conversations**. Each session builds on the last
 | **`/end` commit** | Summarizes session, extracts decisions, saves to knowledge store |
 | **Hybrid search** | Fuses Canonical + [GraphRAG](docs/GRAPHRAG.md) + Tags + [Vectors](docs/VECTORRAG.md) + Filenames via RRF |
 | **Cross-encoder reranking** | Refines top results with `sentence-transformers` |
-| **Protocol library** | [308 unique protocols](examples/protocols/) (63 curated in starter pack) |
+| **Protocol library** | [200+ protocols across 17 categories) |
 
 ### Repository Structure
 
@@ -464,7 +464,7 @@ Athena-Public/
 ├── examples/
 │   ├── quickstart/       # Runnable demos
 │   ├── scripts/          # Automation scripts
-│   ├── protocols/        # Thinking patterns (starter pack included)
+│   ├── protocols/        # 200+ decision frameworks across 17 categories
 │   ├── workflows/        # Slash commands
 │   └── templates/        # Starter templates
 ├── docs/                 # Deep documentation
