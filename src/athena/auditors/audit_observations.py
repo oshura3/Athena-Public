@@ -19,6 +19,8 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 
+from athena.utils.safe_print import safe_print
+
 # ── ANSI Colors ──
 CYAN = "\033[96m"
 GREEN = "\033[92m"
@@ -243,24 +245,24 @@ def generate_observation_report(
 
 def audit_observations(append_to_log: bool = True):
     """Run the passive observation audit."""
-    print(f"\n{BOLD}{CYAN}👁️ PASSIVE OBSERVATION REPORT{RESET}")
-    print(f"{CYAN}{'━' * 70}{RESET}")
+    safe_print(f"\n{BOLD}{CYAN}👁️ PASSIVE OBSERVATION REPORT{RESET}")
+    safe_print(f"{CYAN}{'━' * 70}{RESET}")
 
     start_ref = get_start_ref()
     if not start_ref:
-        print(f"{YELLOW}⚠️  No session start reference found.{RESET}")
-        print(f"{DIM}   Run /start to record the session starting point.{RESET}")
-        print(f"{DIM}   The boot hook writes .context/.session_start_ref{RESET}")
+        safe_print(f"{YELLOW}⚠️  No session start reference found.{RESET}")
+        safe_print(f"{DIM}   Run /start to record the session starting point.{RESET}")
+        safe_print(f"{DIM}   The boot hook writes .context/.session_start_ref{RESET}")
         return
 
-    print(f"{DIM}Session start ref: {start_ref[:8]}...{RESET}\n")
+    safe_print(f"{DIM}Session start ref: {start_ref[:8]}...{RESET}\n")
 
     # Get changes
     changes = get_changes_since(start_ref)
     total = sum(len(v) for v in changes.values())
 
     if total == 0:
-        print(f"{GREEN}✅ No file changes detected since session start.{RESET}")
+        safe_print(f"{GREEN}✅ No file changes detected since session start.{RESET}")
         return
 
     # Classify
@@ -268,27 +270,27 @@ def audit_observations(append_to_log: bool = True):
     commits = get_commit_messages(start_ref)
 
     # Display summary
-    print(f"{BOLD}📊 Session Activity:{RESET}")
+    safe_print(f"{BOLD}📊 Session Activity:{RESET}")
     if changes["added"]:
-        print(f"   {GREEN}+ {len(changes['added'])} files added{RESET}")
+        safe_print(f"   {GREEN}+ {len(changes['added'])} files added{RESET}")
     if changes["modified"]:
-        print(f"   {YELLOW}~ {len(changes['modified'])} files modified{RESET}")
+        safe_print(f"   {YELLOW}~ {len(changes['modified'])} files modified{RESET}")
     if changes["deleted"]:
-        print(f"   {RED}- {len(changes['deleted'])} files deleted{RESET}")
+        safe_print(f"   {RED}- {len(changes['deleted'])} files deleted{RESET}")
     if changes["renamed"]:
-        print(f"   {CYAN}→ {len(changes['renamed'])} files renamed{RESET}")
-    print()
+        safe_print(f"   {CYAN}→ {len(changes['renamed'])} files renamed{RESET}")
+    safe_print()
 
     if commits:
-        print(f"{BOLD}📝 Commits ({len(commits)}):{RESET}")
+        safe_print(f"{BOLD}📝 Commits ({len(commits)}):{RESET}")
         for commit in commits[:10]:
-            print(f"   {commit}")
+            safe_print(f"   {commit}")
         if len(commits) > 10:
-            print(f"   {DIM}...and {len(commits) - 10} more{RESET}")
-        print()
+            safe_print(f"   {DIM}...and {len(commits) - 10} more{RESET}")
+        safe_print()
 
     # Category breakdown
-    print(f"{BOLD}📂 By Category:{RESET}")
+    safe_print(f"{BOLD}📂 By Category:{RESET}")
     category_labels = {
         "protocols": "Protocols",
         "workflows": "Workflows",
@@ -303,7 +305,7 @@ def audit_observations(append_to_log: bool = True):
     }
     for cat, files in classified.items():
         label = category_labels.get(cat, cat)
-        print(f"   {label}: {len(files)} changes")
+        safe_print(f"   {label}: {len(files)} changes")
 
     # Append to session log
     if append_to_log:
@@ -312,18 +314,18 @@ def audit_observations(append_to_log: bool = True):
             report = generate_observation_report(changes, classified, commits)
             with open(session_log, "a", encoding="utf-8") as f:
                 f.write(report)
-            print(
+            safe_print(
                 f"\n{GREEN}✅ Auto-observations appended to {session_log.name}{RESET}"
             )
         else:
-            print(
+            safe_print(
                 f"\n{YELLOW}⚠️  No session log found for today. Report displayed above only.{RESET}"
             )
 
     # Cleanup start ref
     if START_REF_FILE.exists():
         START_REF_FILE.unlink()
-        print(f"{DIM}   (Start ref cleaned up){RESET}")
+        safe_print(f"{DIM}   (Start ref cleaned up){RESET}")
 
 
 if __name__ == "__main__":

@@ -15,6 +15,8 @@ import sys
 from collections import defaultdict
 from urllib.parse import unquote
 
+from athena.utils.safe_print import safe_print
+
 # Configuration
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 OUTPUT_FILE = os.path.join(PROJECT_ROOT, ".context", "memories", "visualizations", "athena_graph_live.html")
@@ -194,7 +196,7 @@ def generate_html(nodes, edges):
     return html_template
 
 def main():
-    print("🔍 Scanning workspace for knowledge nodes...")
+    safe_print("🔍 Scanning workspace for knowledge nodes...")
     files = get_all_md_files()
     
     nodes = []
@@ -221,10 +223,10 @@ def main():
             "value": 1 # Base size
         })
         
-    print(f"✅ Found {len(nodes)} nodes.")
+    safe_print(f"✅ Found {len(nodes)} nodes.")
     
     # Pass 2: Create Edges
-    print("🔗 Linking concepts...")
+    safe_print("🔗 Linking concepts...")
     edge_count = 0
     inbound_counts = defaultdict(int)
     
@@ -254,7 +256,7 @@ def main():
         if count > 10 and node["color"] == "#a8a8b3":
              node["color"] = "#ffffff" # Highlight hubs
              
-    print(f"✅ Created {edge_count} connections.")
+    safe_print(f"✅ Created {edge_count} connections.")
     
     # Generate HTML
     html_content = generate_html(nodes, edges)
@@ -265,7 +267,7 @@ def main():
     with open(OUTPUT_FILE, "w") as f:
         f.write(html_content)
         
-    print(f"🚀 Visualization saved to: {OUTPUT_FILE}")
+    safe_print(f"🚀 Visualization saved to: {OUTPUT_FILE}")
 
 if __name__ == "__main__":
     main()

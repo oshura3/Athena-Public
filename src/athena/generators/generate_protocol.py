@@ -8,6 +8,8 @@ import argparse
 from pathlib import Path
 from dotenv import load_dotenv
 
+from athena.utils.safe_print import safe_print
+
 sys.path.insert(0, str(Path(__file__).parent))
 from gemini_client import get_client
 
@@ -151,7 +153,7 @@ def main():
     args = parser.parse_args()
 
     if args.interactive:
-        print("🔧 Protocol Generator (Ctrl+C to exit)\n")
+        safe_print("🔧 Protocol Generator (Ctrl+C to exit)\n")
         description = input("Describe the workflow: ").strip()
         name = input("Workflow name (or press Enter to auto-generate): ").strip() or None
     elif args.description:
@@ -161,7 +163,7 @@ def main():
         parser.print_help()
         sys.exit(1)
 
-    print("🤖 Generating protocol...")
+    safe_print("🤖 Generating protocol...")
     protocol = generate_protocol(description, name)
     
     if args.output:
@@ -174,7 +176,7 @@ def main():
     
     if output_path:
         output_path.write_text(protocol, encoding="utf-8")
-        print(f"✅ Saved to {output_path}")
+        safe_print(f"✅ Saved to {output_path}")
     else:
         print("\n" + protocol)
 

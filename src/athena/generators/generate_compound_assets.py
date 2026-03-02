@@ -12,6 +12,8 @@ from datetime import datetime
 from dotenv import load_dotenv
 import google.generativeai as genai
 
+from athena.utils.safe_print import safe_print
+
 load_dotenv()
 
 # Configure Gemini
@@ -29,7 +31,7 @@ call_count = 0
 def log_call(task: str):
     global call_count
     call_count += 1
-    print(f"🔥 API Call #{call_count}/19: {task}")
+    safe_print(f"🔥 API Call #{call_count}/19: {task}")
 
 
 def save_asset(name: str, content: str, subdir: str = ""):
@@ -39,7 +41,7 @@ def save_asset(name: str, content: str, subdir: str = ""):
 
     filepath = target_dir / f"{name}.md"
     filepath.write_text(content)
-    print(f"   ✅ Saved: {filepath.relative_to(WORKSPACE)}")
+    safe_print(f"   ✅ Saved: {filepath.relative_to(WORKSPACE)}")
     return filepath
 
 
@@ -48,9 +50,9 @@ def save_asset(name: str, content: str, subdir: str = ""):
 # ============================================================
 def generate_protocol_summaries():
     """Generate condensed summaries of hot protocols."""
-    print("\n" + "=" * 60)
-    print("📜 TASK 1: Protocol Summaries (5 calls)")
-    print("=" * 60)
+    safe_print("\n" + "=" * 60)
+    safe_print("📜 TASK 1: Protocol Summaries (5 calls)")
+    safe_print("=" * 60)
 
     hot_protocols = [
         WORKSPACE / ".agent/skills/protocols/meta/000-ultimate-auditor.md",
@@ -64,7 +66,7 @@ def generate_protocol_summaries():
 
     for proto_path in hot_protocols:
         if not proto_path.exists():
-            print(f"   ⚠️ Not found: {proto_path.name}")
+            safe_print(f"   ⚠️ Not found: {proto_path.name}")
             continue
 
         content = proto_path.read_text()[:8000]  # Limit input
@@ -84,7 +86,7 @@ Protocol:
             summary = response.text.strip()
             save_asset(f"summary_{proto_path.stem}", summary, "protocol_summaries")
         except Exception as e:
-            print(f"   ❌ Error: {e}")
+            safe_print(f"   ❌ Error: {e}")
 
 
 # ============================================================
@@ -92,9 +94,9 @@ Protocol:
 # ============================================================
 def generate_session_tldrs():
     """Generate TL;DRs for recent sessions."""
-    print("\n" + "=" * 60)
-    print("📋 TASK 2: Session TL;DRs (5 calls)")
-    print("=" * 60)
+    safe_print("\n" + "=" * 60)
+    safe_print("📋 TASK 2: Session TL;DRs (5 calls)")
+    safe_print("=" * 60)
 
     sessions = sorted(
         (WORKSPACE / ".context/memories/session_logs").glob("2026-01-*.md"),
@@ -120,7 +122,7 @@ Session:
             tldr = response.text.strip()
             save_asset(f"tldr_{session_path.stem}", tldr, "session_tldrs")
         except Exception as e:
-            print(f"   ❌ Error: {e}")
+            safe_print(f"   ❌ Error: {e}")
 
 
 # ============================================================
@@ -128,9 +130,9 @@ Session:
 # ============================================================
 def refresh_entity_extraction():
     """Extract entities from key documents."""
-    print("\n" + "=" * 60)
-    print("🧠 TASK 3: Entity Extraction (5 calls)")
-    print("=" * 60)
+    safe_print("\n" + "=" * 60)
+    safe_print("🧠 TASK 3: Entity Extraction (5 calls)")
+    safe_print("=" * 60)
 
     key_docs = [
         WORKSPACE / ".framework/v7.0/modules/Core_Identity.md",
@@ -146,7 +148,7 @@ def refresh_entity_extraction():
 
     for doc_path in key_docs:
         if not doc_path.exists():
-            print(f"   ⚠️ Not found: {doc_path.name}")
+            safe_print(f"   ⚠️ Not found: {doc_path.name}")
             continue
 
         content = doc_path.read_text()[:8000]
@@ -169,9 +171,9 @@ Return ONLY valid JSON array, no markdown.
 
             entities = json.loads(text)
             all_entities.extend(entities)
-            print(f"   📊 Extracted {len(entities)} entities")
+            safe_print(f"   📊 Extracted {len(entities)} entities")
         except Exception as e:
-            print(f"   ❌ Error: {e}")
+            safe_print(f"   ❌ Error: {e}")
 
     # Save consolidated entities
     save_asset("extracted_entities", json.dumps(all_entities, indent=2), "entities")
@@ -182,9 +184,9 @@ Return ONLY valid JSON array, no markdown.
 # ============================================================
 def generate_stealable_prompts():
     """Generate reusable meta-prompts for top workflows."""
-    print("\n" + "=" * 60)
-    print("🎯 TASK 4: Stealable Prompts (4 calls)")
-    print("=" * 60)
+    safe_print("\n" + "=" * 60)
+    safe_print("🎯 TASK 4: Stealable Prompts (4 calls)")
+    safe_print("=" * 60)
 
     top_workflows = [
         WORKSPACE / ".agent/workflows/start.md",
@@ -195,7 +197,7 @@ def generate_stealable_prompts():
 
     for wf_path in top_workflows:
         if not wf_path.exists():
-            print(f"   ⚠️ Not found: {wf_path.name}")
+            safe_print(f"   ⚠️ Not found: {wf_path.name}")
             continue
 
         content = wf_path.read_text()[:6000]
@@ -218,26 +220,26 @@ Workflow:
             prompt = response.text.strip()
             save_asset(f"stealable_{wf_path.stem}", prompt, "stealable_prompts")
         except Exception as e:
-            print(f"   ❌ Error: {e}")
+            safe_print(f"   ❌ Error: {e}")
 
 
 # ============================================================
 # MAIN
 # ============================================================
 if __name__ == "__main__":
-    print("=" * 60)
-    print("⚡ COMPOUND ASSET GENERATOR")
-    print(f"   Model: gemini-3-flash-preview")
-    print(f"   Budget: 19 API calls")
-    print(f"   Time: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
-    print("=" * 60)
+    safe_print("=" * 60)
+    safe_print("⚡ COMPOUND ASSET GENERATOR")
+    safe_print(f"   Model: gemini-3-flash-preview")
+    safe_print(f"   Budget: 19 API calls")
+    safe_print(f"   Time: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+    safe_print("=" * 60)
 
     generate_protocol_summaries()  # 5 calls
     generate_session_tldrs()  # 5 calls
     refresh_entity_extraction()  # 5 calls
     generate_stealable_prompts()  # 4 calls
 
-    print("\n" + "=" * 60)
-    print(f"✅ COMPLETE: {call_count} API calls used")
-    print(f"   Assets saved to: {CACHE_DIR.relative_to(WORKSPACE)}")
-    print("=" * 60)
+    safe_print("\n" + "=" * 60)
+    safe_print(f"✅ COMPLETE: {call_count} API calls used")
+    safe_print(f"   Assets saved to: {CACHE_DIR.relative_to(WORKSPACE)}")
+    safe_print("=" * 60)

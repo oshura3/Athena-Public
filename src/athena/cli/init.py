@@ -11,10 +11,20 @@ Usage:
     athena init --here                # Same as above
     athena init --here --ide cursor   # Init with Cursor-specific config
     athena init my-project            # Create new project directory
+
+Windows PowerShell Compatibility:
+    On Windows consoles with limited encoding (cp1252, cp437), this module
+    automatically detects the limitation and provides ASCII fallbacks for
+    emojis and Unicode characters to prevent UnicodeEncodeError.
 """
 
+import sys
+import os
 from datetime import datetime
 from pathlib import Path
+
+# Import shared safe_print utility for Windows console compatibility
+from athena.utils.safe_print import safe_print
 
 
 # --- Templates ---
@@ -318,10 +328,10 @@ def init_workspace(target_dir: Path = None, ide: str = None) -> bool:
     root = target_dir or Path.cwd()
     root = Path(root).resolve()
 
-    print("🏛️  ATHENA INIT")
+    safe_print("🧠 ATHENA INIT")
 
     if ide:
-        print(f"   IDE: {ide}")
+        safe_print(f"   IDE: {ide}")
     print("=" * 60)
 
     # Define structure
@@ -335,18 +345,18 @@ def init_workspace(target_dir: Path = None, ide: str = None) -> bool:
     ]
 
     # Create directories
-    print("\n📁 Creating directories...")
+    safe_print("\n📁 Creating directories...")
     for dir_path in directories:
         full_path = root / dir_path
         full_path.mkdir(parents=True, exist_ok=True)
-        print(f"   ✅ {dir_path}/")
+        safe_print(f"   ✅ {dir_path}/")
 
     # Create root marker (for path discovery)
     marker_path = root / ".athena_root"
     marker_path.write_text(
         f"# Athena Workspace\nCreated: {datetime.now().isoformat()}\n", encoding="utf-8"
     )
-    print("   ✅ .athena_root (workspace marker)")
+    safe_print("   ✅ .athena_root (workspace marker)")
 
     # Create template files
     today = datetime.now().strftime("%Y-%m-%d")
@@ -365,29 +375,29 @@ def init_workspace(target_dir: Path = None, ide: str = None) -> bool:
         ),
     ]
 
-    print("\n📝 Creating template files...")
+    safe_print("\n📝 Creating template files...")
     for file_path, content in templates:
         full_path = root / file_path
         if not full_path.exists():
             full_path.write_text(content, encoding="utf-8")
-            print(f"   ✅ {file_path}")
+            safe_print(f"   ✅ {file_path}")
         else:
-            print(f"   ⏭️  {file_path} (already exists)")
+            safe_print(f"   ⏭️  {file_path} (already exists)")
 
     # IDE-specific configuration
     if ide:
-        print(f"\n⚙️  Creating {ide} configuration...")
+        safe_print(f"\n⚙️  Creating {ide} configuration...")
         _create_ide_config(root, ide)
 
     # Summary
     print("\n" + "=" * 60)
-    print("✅ ATHENA WORKSPACE INITIALIZED")
+    safe_print("✅ ATHENA WORKSPACE INITIALIZED")
     print("=" * 60)
-    print("\n🚀 Next steps:")
-    print("   1. Open this folder in your AI IDE")
-    print('   2. Type "/start" to boot your agent')
-    print('   3. Work with your agent, then type "/end" to save')
-    print("\n📚 Docs: https://github.com/winstonkoh87/Athena-Public")
+    safe_print("\n🚀 Next steps:")
+    safe_print("   1. Open this folder in your AI IDE")
+    safe_print('   2. Type "/start" to boot your agent')
+    safe_print('   3. Work with your agent, then type "/end" to save')
+    safe_print("\n📚 Docs: https://github.com/winstonkoh87/Athena-Public")
 
     return True
 
@@ -400,9 +410,9 @@ def _create_ide_config(root: Path, ide: str) -> None:
         agents_path = root / "AGENTS.md"
         if not agents_path.exists():
             agents_path.write_text(ANTIGRAVITY_RULES, encoding="utf-8")
-            print("   ✅ AGENTS.md (Antigravity rules)")
+            safe_print("   ✅ AGENTS.md (Antigravity rules)")
         else:
-            print("   ⏭️  AGENTS.md (already exists)")
+            safe_print("   ⏭️  AGENTS.md (already exists)")
 
     elif ide == "cursor":
         # Cursor uses .cursorrules
@@ -411,9 +421,9 @@ def _create_ide_config(root: Path, ide: str) -> None:
         rules_path = cursor_dir / "rules.md"
         if not rules_path.exists():
             rules_path.write_text(CURSOR_RULES, encoding="utf-8")
-            print("   ✅ .cursor/rules.md")
+            safe_print("   ✅ .cursor/rules.md")
         else:
-            print("   ⏭️  .cursor/rules.md (already exists)")
+            safe_print("   ⏭️  .cursor/rules.md (already exists)")
 
     elif ide == "vscode":
         # VS Code uses .vscode/settings.json
@@ -422,9 +432,9 @@ def _create_ide_config(root: Path, ide: str) -> None:
         settings_path = vscode_dir / "settings.json"
         if not settings_path.exists():
             settings_path.write_text(VSCODE_SETTINGS, encoding="utf-8")
-            print("   ✅ .vscode/settings.json")
+            safe_print("   ✅ .vscode/settings.json")
         else:
-            print("   ⏭️  .vscode/settings.json (already exists)")
+            safe_print("   ⏭️  .vscode/settings.json (already exists)")
 
     elif ide == "gemini":
         # Gemini CLI uses AGENTS.md or .gemini/
@@ -433,9 +443,9 @@ def _create_ide_config(root: Path, ide: str) -> None:
         rules_path = gemini_dir / "AGENTS.md"
         if not rules_path.exists():
             rules_path.write_text(GEMINI_RULES, encoding="utf-8")
-            print("   ✅ .gemini/AGENTS.md")
+            safe_print("   ✅ .gemini/AGENTS.md")
         else:
-            print("   ⏭️  .gemini/AGENTS.md (already exists)")
+            safe_print("   ⏭️  .gemini/AGENTS.md (already exists)")
 
     elif ide == "kilocode":
         # Kilo Code uses .kilocode/rules/athena.md
@@ -444,9 +454,9 @@ def _create_ide_config(root: Path, ide: str) -> None:
         rules_path = kilocode_dir / "athena.md"
         if not rules_path.exists():
             rules_path.write_text(KILOCODE_RULES, encoding="utf-8")
-            print("   ✅ .kilocode/rules/athena.md")
+            safe_print("   ✅ .kilocode/rules/athena.md")
         else:
-            print("   ⏭️  .kilocode/rules/athena.md (already exists)")
+            safe_print("   ⏭️  .kilocode/rules/athena.md (already exists)")
 
     elif ide == "roocode":
         # Roo Code uses .roo/rules/athena.md
@@ -455,9 +465,9 @@ def _create_ide_config(root: Path, ide: str) -> None:
         rules_path = roocode_dir / "athena.md"
         if not rules_path.exists():
             rules_path.write_text(ROOCODE_RULES, encoding="utf-8")
-            print("   ✅ .roo/rules/athena.md")
+            safe_print("   ✅ .roo/rules/athena.md")
         else:
-            print("   ⏭️  .roo/rules/athena.md (already exists)")
+            safe_print("   ⏭️  .roo/rules/athena.md (already exists)")
 
 
 if __name__ == "__main__":

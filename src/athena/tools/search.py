@@ -24,6 +24,7 @@ from athena.core.config import (
 )
 from athena.core.models import SearchResult
 from athena.core.cache import get_search_cache
+from athena.utils.safe_print import safe_print
 # Lazy imports to speed up CLI startup
 # from athena.memory.vectors import ... (Moved inside functions)
 # from athena.tools.reranker import ... (Moved inside functions)
@@ -253,7 +254,7 @@ def collect_vectors(
                     worker_client, query_embedding, limit=limit, threshold=threshold
                 )
             except Exception as e:
-                print(f"   ⚠️ Search failed for {type_label}: {e}", file=sys.stderr)
+                safe_print(f"   ⚠️ Search failed for {type_label}: {e}", file=sys.stderr)
                 return type_label, []
 
         with ThreadPoolExecutor(max_workers=len(search_tasks)) as executor:
@@ -616,7 +617,7 @@ def collect_sqlite(query: str, limit: int = 10) -> list[SearchResult]:
 
         conn.close()
     except Exception as e:
-        print(f"   ⚠️ SQLite fallback failed: {e}", file=sys.stderr)
+        safe_print(f"   ⚠️ SQLite fallback failed: {e}", file=sys.stderr)
 
     return results
 
@@ -661,7 +662,7 @@ def collect_exocortex(query: str, limit: int = 5) -> list[SearchResult]:
 
         conn.close()
     except Exception as e:
-        print(f"   ⚠️ Exocortex search failed: {e}", file=sys.stderr)
+        safe_print(f"   ⚠️ Exocortex search failed: {e}", file=sys.stderr)
 
     return results
 
@@ -718,14 +719,14 @@ def run_search(
 
     if cached_results is not None:
         if not json_output:
-            print(f'\n⚡ CACHE HIT: "{query}"')
-            print("=" * 60)
+            safe_print(f'\n⚡ CACHE HIT: "{query}"', file=sys.stderr)
+            safe_print("=" * 60, file=sys.stderr)
         fused_results = cached_results
     else:
         # 0.5. Check Semantic Cache (if miss on exact)
         query_embedding = None
         if not json_output:
-            print("   ⚡ Checking semantic cache...")
+            safe_print("   ⚡ Checking semantic cache...")
 
         try:
             # We need the embedding for semantic check
@@ -750,8 +751,8 @@ def run_search(
 
             if semantic_hit:
                 if not json_output:
-                    print(f'🔥 SEMANTIC CACHE HIT: "{query}"')
-                    print("=" * 60)
+                    safe_print(f'🔥 SEMANTIC CACHE HIT: "{query}"')
+                    safe_print("=" * 60)
                 fused_results = semantic_hit
                 # Proceed to display (skip collection)
                 pass
@@ -790,7 +791,7 @@ def run_search(
                 try:
                     return func()
                 except Exception as e:
-                    print(f"   ⚠️ {name} task failed: {e}", file=sys.stderr)
+                    safe_print(f"   ⚠️ {name} task failed: {e}", file=sys.stderr)
                     return []
 
             if skills_only:
@@ -888,7 +889,7 @@ def run_search(
         if rerank and fused_results:
             candidates = fused_results[:25]
             if not json_output:
-                print(f"   ⚡ Reranking top {len(candidates)} candidates...")
+                safe_print(f"   ⚡ Reranking top {len(candidates)} candidates...")
             from athena.tools.reranker import rerank_results
 
             fused_results = rerank_results(query, candidates, top_k=limit)
@@ -937,7 +938,7 @@ def run_search(
         return
 
     if not json_output:
-        print(f"\n🏆 TOP {limit} RESULTS:")
+        safe_print(f"\n🏆 TOP {limit} RESULTS:")
         for i, doc in enumerate(fused_results[:limit], 1):
             if doc.rrf_score >= CONFIDENCE_HIGH:
                 conf_badge = "[HIGH]"
@@ -957,9 +958,9 @@ def run_search(
                 print(f"     Signals: {json.dumps(doc.signals)}")
 
             if doc.metadata.get("path"):
-                print(f"     📁 {doc.metadata['path']}")
+                safe_print(f"     📁 {doc.metadata['path']}")
             else:
-                print(f"     📄 {doc.content[:100]}...")
+                safe_print(f"     📄 {doc.content[:100]}...")
 
         print("-" * 60)
         print("</athena_grounding>\n")

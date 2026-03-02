@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from athena.boot.constants import PROJECT_ROOT, DIM, RESET
+from athena.utils.safe_print import safe_print
 
 
 class PrefetchLoader:
@@ -16,7 +17,7 @@ class PrefetchLoader:
                 manifest = json.load(f)
 
             files = manifest.get("files", [])
-            print(f"\n{DIM}🔥 Prefetching {len(files)} hot files...{RESET}")
+            safe_print(f"\n{DIM}🔥 Prefetching {len(files)} hot files...{RESET}")
 
             for f_info in files:
                 f_path = PROJECT_ROOT / f_info["path"]

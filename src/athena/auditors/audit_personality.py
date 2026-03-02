@@ -21,6 +21,8 @@ import glob
 from datetime import datetime
 from pathlib import Path
 
+from athena.utils.safe_print import safe_print
+
 # Paths
 CONTEXT_DIR = Path(__file__).parent.parent.parent / ".context"
 PROFILE_DIR = CONTEXT_DIR / "profile"
@@ -257,19 +259,19 @@ def check_living_doc_freshness():
 
 
 def main():
-    print("=" * 60)
-    print("🫀 METABOLIC SCAN — Living Docs Update Check")
-    print("=" * 60)
-    print()
+    safe_print("=" * 60)
+    safe_print("🫀 METABOLIC SCAN — Living Docs Update Check")
+    safe_print("=" * 60)
+    safe_print()
     
     # Get latest session
     session_file = get_latest_session_log()
     if not session_file:
-        print("❌ No session log found for today.")
+        safe_print("❌ No session log found for today.")
         return
     
-    print(f"📄 Session: {session_file.name}")
-    print()
+    safe_print(f"📄 Session: {session_file.name}")
+    safe_print()
     
     # Read session content
     session_content = session_file.read_text()
@@ -287,22 +289,22 @@ def main():
     # PERSONALITY DRIFT REPORT
     # ============================================================
     if drift["recommendations"]:
-        print("🧬 PERSONALITY DRIFT DETECTED")
-        print("-" * 60)
+        safe_print("🧬 PERSONALITY DRIFT DETECTED")
+        safe_print("-" * 60)
         for rec in drift["recommendations"]:
-            print(f"   {rec}")
-        print()
-        print(f"   Current MBTI: {CURRENT_PROFILE['MBTI']}")
-        print(f"   Current Big Five: N={CURRENT_PROFILE['Big_Five']['Neuroticism']}, E={CURRENT_PROFILE['Big_Five']['Extraversion']}, O={CURRENT_PROFILE['Big_Five']['Openness']}, A={CURRENT_PROFILE['Big_Five']['Agreeableness']}, C={CURRENT_PROFILE['Big_Five']['Conscientiousness']}")
-        print()
-        print("   ➡️  ACTION: Update User_Profile_Core.md if sustained pattern")
-        print()
+            safe_print(f"   {rec}")
+        safe_print()
+        safe_print(f"   Current MBTI: {CURRENT_PROFILE['MBTI']}")
+        safe_print(f"   Current Big Five: N={CURRENT_PROFILE['Big_Five']['Neuroticism']}, E={CURRENT_PROFILE['Big_Five']['Extraversion']}, O={CURRENT_PROFILE['Big_Five']['Openness']}, A={CURRENT_PROFILE['Big_Five']['Agreeableness']}, C={CURRENT_PROFILE['Big_Five']['Conscientiousness']}")
+        safe_print()
+        safe_print("   ➡️  ACTION: Update User_Profile_Core.md if sustained pattern")
+        safe_print()
     
     # ============================================================
     # LIVING DOCS CHECKLIST
     # ============================================================
-    print("📋 LIVING DOCS UPDATE CHECKLIST")
-    print("-" * 60)
+    safe_print("📋 LIVING DOCS UPDATE CHECKLIST")
+    safe_print("-" * 60)
     
     updates_needed = False
     
@@ -313,34 +315,34 @@ def main():
         # Force flag User_Profile_Core.md if personality drift detected
         if doc == "User_Profile_Core.md" and drift["recommendations"]:
             updates_needed = True
-            print(f"\n⚠️  {doc} — PERSONALITY DRIFT FLAGGED")
-            print(f"   Purpose: {description}")
-            print(f"   Last Updated: {last_updated}")
-            print(f"   ➡️  ACTION: Review Big Five / MBTI scores")
+            safe_print(f"\n⚠️  {doc} — PERSONALITY DRIFT FLAGGED")
+            safe_print(f"   Purpose: {description}")
+            safe_print(f"   Last Updated: {last_updated}")
+            safe_print(f"   ➡️  ACTION: Review Big Five / MBTI scores")
         elif doc_signals:
             updates_needed = True
-            print(f"\n⚠️  {doc}")
-            print(f"   Purpose: {description}")
-            print(f"   Last Updated: {last_updated}")
-            print(f"   Detected Signals: {', '.join(doc_signals[:8])}")
-            print(f"   ➡️  ACTION: Review and update if new insights found")
+            safe_print(f"\n⚠️  {doc}")
+            safe_print(f"   Purpose: {description}")
+            safe_print(f"   Last Updated: {last_updated}")
+            safe_print(f"   Detected Signals: {', '.join(doc_signals[:8])}")
+            safe_print(f"   ➡️  ACTION: Review and update if new insights found")
         else:
-            print(f"\n✅ {doc} — No signals detected")
+            safe_print(f"\n✅ {doc} — No signals detected")
     
-    print()
-    print("-" * 60)
+    safe_print()
+    safe_print("-" * 60)
     
     if updates_needed or drift["recommendations"]:
-        print("⚠️  UPDATES MAY BE NEEDED. AI must review session for:")
-        print("   • Personality score changes → User_Profile_Core.md")
-        print("   • New psychological insights → Psychology_Layers.md")
-        print("   • New calibration references → Session_Observations.md")
-        print("   • New decision rules → Operating_Principles.md")
+        safe_print("⚠️  UPDATES MAY BE NEEDED. AI must review session for:")
+        safe_print("   • Personality score changes → User_Profile_Core.md")
+        safe_print("   • New psychological insights → Psychology_Layers.md")
+        safe_print("   • New calibration references → Session_Observations.md")
+        safe_print("   • New decision rules → Operating_Principles.md")
     else:
-        print("✅ No obvious updates detected. Verify manually.")
+        safe_print("✅ No obvious updates detected. Verify manually.")
     
-    print()
-    print("=" * 60)
+    safe_print()
+    safe_print("=" * 60)
 
 
 if __name__ == "__main__":

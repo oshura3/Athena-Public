@@ -25,6 +25,7 @@ from typing import Any, Dict, List, Tuple
 
 from athena.core.models import SearchResult
 from athena.memory.vectors import get_embedding
+from athena.utils.safe_print import safe_print
 
 # ── Decomposition Config ─────────────────────────────────────────────────────
 
@@ -294,7 +295,7 @@ def _run_subquery_search(subquery: str, limit: int = 10) -> Tuple[str, List[Dict
         return subquery, fused[:limit]
 
     except Exception as e:
-        print(f"   ⚠️ Sub-query failed: '{subquery}': {e}", file=sys.stderr)
+        safe_print(f"   ⚠️ Sub-query failed: '{subquery}': {e}", file=sys.stderr)
         return subquery, []
 
 
@@ -353,9 +354,9 @@ def agentic_search(
     was_decomposed = len(sub_queries) > 1
 
     if debug:
-        print(f"🧩 Decomposition: {len(sub_queries)} sub-queries", file=sys.stderr)
+        safe_print(f"🧩 Decomposition: {len(sub_queries)} sub-queries", file=sys.stderr)
         for i, sq in enumerate(sub_queries, 1):
-            print(f"   {i}. '{sq}'", file=sys.stderr)
+            safe_print(f"   {i}. '{sq}'", file=sys.stderr)
 
     # Phase 2: Parallel Retrieval
     all_results: Dict[str, SearchResult] = {}  # Dedup by doc ID
@@ -377,7 +378,7 @@ def agentic_search(
                         existing.rrf_score = max(existing.rrf_score, result.rrf_score) * 1.1
                     provenance[result.id].append(sq)
             except Exception as e:
-                print(f"   ⚠️ Sub-query execution failed: {e}", file=sys.stderr)
+                safe_print(f"   ⚠️ Sub-query execution failed: {e}", file=sys.stderr)
 
     # Sort by fused score
     merged = sorted(all_results.values(), key=lambda x: x.rrf_score, reverse=True)
@@ -389,7 +390,7 @@ def agentic_search(
             merged = validate_results(merged, query_embedding)
         except Exception as e:
             if debug:
-                print(f"   ⚠️ Validation skipped: {e}", file=sys.stderr)
+                safe_print(f"   ⚠️ Validation skipped: {e}", file=sys.stderr)
 
     # Phase 4: Final ranking
     final = merged[:limit]
@@ -438,21 +439,21 @@ def run_agentic_search(
     sq_count = len(result["sub_queries"])
     total = result["meta"]["total_candidates"]
 
-    print(f'\n🧠 AGENTIC SEARCH: "{query}"')
-    print("=" * 60)
+    safe_print(f'\n🧠 AGENTIC SEARCH: "{query}"')
+    safe_print("=" * 60)
 
     if result["decomposed"]:
-        print(f"   🧩 Decomposed into {sq_count} sub-queries:")
+        safe_print(f"   🧩 Decomposed into {sq_count} sub-queries:")
         for i, sq in enumerate(result["sub_queries"], 1):
-            print(f'      {i}. "{sq}"')
+            safe_print(f'      {i}. "{sq}"')
     else:
-        print("   📎 Single-query mode (no decomposition needed)")
+        safe_print("   📎 Single-query mode (no decomposition needed)")
 
-    print(f"   📊 {total} unique candidates found → returning top {len(result['results'])}")
+    safe_print(f"   📊 {total} unique candidates found → returning top {len(result['results'])}")
 
     if result["results"]:
         print("\n<athena_grounding>")
-        print(f"\n🏆 TOP {limit} RESULTS:")
+        safe_print(f"\n🏆 TOP {limit} RESULTS:")
         for i, doc in enumerate(result["results"], 1):
             multi = "🔗" if doc.metadata.get("multi_source") else "  "
             vscore = doc.metadata.get("validation_score", "—")
@@ -462,12 +463,12 @@ def run_agentic_search(
             print(f"\n  {multi} {i}. [RRF:{doc.rrf_score:.4f} V:{vscore}] {doc.id}")
 
             if doc.metadata.get("path"):
-                print(f"        📁 {doc.metadata['path']}")
+                safe_print(f"        📁 {doc.metadata['path']}")
             else:
-                print(f"        📄 {doc.content[:100]}...")
+                safe_print(f"        📄 {doc.content[:100]}...")
 
             if debug and doc.metadata.get("found_by"):
-                print(f"        🧩 Found by: {doc.metadata['found_by']}")
+                safe_print(f"        🧩 Found by: {doc.metadata['found_by']}")
 
         print("-" * 60)
         print("</athena_grounding>\n")

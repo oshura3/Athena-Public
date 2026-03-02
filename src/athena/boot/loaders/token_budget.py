@@ -23,6 +23,7 @@ from athena.boot.constants import (
     DIM,
     RESET,
 )
+from athena.utils.safe_print import safe_print
 
 # === Budget Constants ===
 HARD_CAP = 20_000  # Tokens — triggers auto-compaction (SPEC_SHEET.md ceiling)
@@ -99,34 +100,34 @@ def display_gauge(token_counts: dict = None) -> bool:
     remaining = ECL - total
 
     # Header
-    print(f"\n{CYAN}{BOLD}📊 Token Budget:{RESET}")
+    safe_print(f"\n{CYAN}{BOLD}📊 Token Budget:{RESET}")
 
     # Per-file breakdown
     for name, count in token_counts.items():
         indicator = "✅"
         if name == "activeContext.md" and over_budget:
             indicator = "🔴"
-        print(f"   {indicator} {name:<25} {count:>6,} tokens")
+        safe_print(f"   {indicator} {name:<25} {count:>6,} tokens")
 
     # Divider
-    print(f"   {'─' * 42}")
+    safe_print(f"   {'─' * 42}")
 
     # Total
     color = RED if over_budget else GREEN
     status = " 🔴 OVER CAP" if over_budget else ""
-    print(f"   {color}{BOLD}Total: {total:>6,} / {HARD_CAP:,} tokens{status}{RESET}")
+    safe_print(f"   {color}{BOLD}Total: {total:>6,} / {HARD_CAP:,} tokens{status}{RESET}")
 
     # Bar
     bar = _build_bar(total)
     marker_pos = f"{total / 1000:.1f}K"
     if over_budget:
-        print(f"   0K {bar} 20K ← {RED}{marker_pos}{RESET}")
+        safe_print(f"   0K {bar} 20K ← {RED}{marker_pos}{RESET}")
     else:
-        print(f"   0K {bar} 20K")
+        safe_print(f"   0K {bar} 20K")
 
     # Remaining
     remaining_k = remaining // 1000
-    print(f"   {DIM}💡 ~{remaining_k}K tokens available for this session.{RESET}")
+    safe_print(f"   {DIM}💡 ~{remaining_k}K tokens available for this session.{RESET}")
 
     return over_budget
 
@@ -154,7 +155,7 @@ def auto_compact_if_needed(token_counts: dict = None) -> dict:
         sys.path.insert(0, str(PROJECT_ROOT / ".agent" / "scripts"))
         from compact_context import compact_active_context
     except ImportError as e:
-        print(f"   {RED}❌ Cannot import compact_context: {e}{RESET}")
+        safe_print(f"   {RED}❌ Cannot import compact_context: {e}{RESET}")
         return token_counts
 
     before_tokens = token_counts.get("activeContext.md", 0)

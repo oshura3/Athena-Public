@@ -14,6 +14,8 @@ import re
 import yaml
 from pathlib import Path
 
+from athena.utils.safe_print import safe_print
+
 SESSION_DIR = Path(".context/memories/session_logs")
 ARCHIVE_DIR = SESSION_DIR / "archive"
 
@@ -70,12 +72,12 @@ def main():
     )
     backlog = total - extracted
 
-    print(f"\n📊 Session Audit Result")
-    print(f"=======================")
-    print(f"Total Sessions: {total}")
-    print(f"GraphRAG Extracted: {extracted} ({extracted / total * 100:.1f}%)")
-    print(f"Backlog: {backlog}")
-    print(f"Missing Learnings (Quality Gap): {missing_learnings}")
+    safe_print(f"\n📊 Session Audit Result")
+    safe_print(f"=======================")
+    safe_print(f"Total Sessions: {total}")
+    safe_print(f"GraphRAG Extracted: {extracted} ({extracted / total * 100:.1f}%)")
+    safe_print(f"Backlog: {backlog}")
+    safe_print(f"Missing Learnings (Quality Gap): {missing_learnings}")
 
     # Save detailed backlog to file for extract_entities.py to consume
     with open(".context/graphrag_backlog.txt", "w") as f:
@@ -83,7 +85,7 @@ def main():
             if not r.get("is_extracted"):
                 f.write(f"{r['file']}\n")
 
-    print(f"\n✅ Backlog written to .context/graphrag_backlog.txt")
+    safe_print(f"\n✅ Backlog written to .context/graphrag_backlog.txt")
 
 
 if __name__ == "__main__":

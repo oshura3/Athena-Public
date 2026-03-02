@@ -13,10 +13,20 @@ Usage:
     athena save "summary"      # Quicksave checkpoint
     athena --version           # Show version
     athena --help              # Show help
+
+Windows PowerShell Compatibility:
+    On Windows consoles with limited encoding (cp1252, cp437), this module
+    automatically detects the limitation and provides ASCII fallbacks for
+    emojis and Unicode characters to prevent UnicodeEncodeError.
+    
+    The `supports_unicode()` function detects the terminal encoding, and
+    `safe_print()` automatically replaces emojis with ASCII alternatives
+    like [CHECK], [OK], [WARNING], etc.
 """
 
 import argparse
 import sys
+import os
 from pathlib import Path
 
 # Load environment variables FIRST (critical fix)
@@ -27,43 +37,46 @@ try:
 except ImportError:
     pass  # dotenv is optional for minimal installs
 
+# Import shared safe_print utility for Windows console compatibility
+from athena.utils.safe_print import safe_print
+
 
 def run_check():
     """Run system health diagnostics."""
     from athena import __version__
 
-    print("🩺 ATHENA SYSTEM CHECK")
+    safe_print("🩺 ATHENA SYSTEM CHECK")
     print("=" * 60)
     print(f"   CLI Version: {__version__}")
 
     # Check for .athena_root marker
     root_marker = Path.cwd() / ".athena_root"
     if root_marker.exists():
-        print("   ✅ Workspace marker: Found")
+        safe_print("   ✅ Workspace marker: Found")
     else:
-        print("   ⚠️  Workspace marker: Missing (run `athena init .` first)")
+        safe_print("   ⚠️  Workspace marker: Missing (run `athena init .` first)")
 
     # Check key directories
     dirs_to_check = [".agent", ".context", ".framework"]
     for d in dirs_to_check:
         if (Path.cwd() / d).exists():
-            print(f"   ✅ {d}/: Found")
+            safe_print(f"   ✅ {d}/: Found")
         else:
-            print(f"   ❌ {d}/: Missing")
+            safe_print(f"   ❌ {d}/: Missing")
 
     # Check environment variables
     import os
 
     env_vars = ["SUPABASE_URL", "SUPABASE_ANON_KEY", "ANTHROPIC_API_KEY"]
-    print("\n🔑 Environment Variables:")
+    safe_print("\n🔑 Environment Variables:")
     for var in env_vars:
         if os.getenv(var):
-            print(f"   ✅ {var}: Set")
+            safe_print(f"   ✅ {var}: Set")
         else:
-            print(f"   ⚠️  {var}: Not set (optional for cloud features)")
+            safe_print(f"   ⚠️  {var}: Not set (optional for cloud features)")
 
     print("\n" + "=" * 60)
-    print("📚 Docs: https://github.com/winstonkoh87/Athena-Public")
+    safe_print("📚 Docs: https://github.com/winstonkoh87/Athena-Public")
     return True
 
 

@@ -17,6 +17,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from athena.utils.safe_print import safe_print
+
 # --- Configuration ---
 
 
@@ -216,8 +218,8 @@ def relay_error(
 
     if auto_save:
         filepath = save_diagnostic_draft(diagnostic)
-        print(f"📋 Diagnostic saved: {filepath.name}")
-        print("   Review and submit to: https://github.com/[AUTHOR]87/Athena-Public/issues/new")
+        safe_print(f"📋 Diagnostic saved: {filepath.name}")
+        safe_print("   Review and submit to: https://github.com/[AUTHOR]87/Athena-Public/issues/new")
         return filepath
 
     return None
@@ -253,7 +255,7 @@ def diagnostic_wrapper(module_name: str = "unknown"):
 
 if __name__ == "__main__":
     # Demo: Test the relay with a fake exception
-    print("🧪 Testing Diagnostic Relay...")
+    safe_print("🧪 Testing Diagnostic Relay...")
     try:
         raise ValueError("Test error: Column 'name' does not exist in table 'references'")
     except Exception as e:
@@ -263,5 +265,5 @@ if __name__ == "__main__":
             module_name="sync.py",
         )
         if path:
-            print(f"✅ Draft created: {path}")
+            safe_print(f"✅ Draft created: {path}")
             print(path.read_text())

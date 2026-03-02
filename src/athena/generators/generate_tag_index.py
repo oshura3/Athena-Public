@@ -14,6 +14,8 @@ import re
 from pathlib import Path
 from collections import defaultdict
 
+from athena.utils.safe_print import safe_print
+
 ROOT_DIR = Path(__file__).parent.parent.parent.parent
 CONTEXT_DIR = ROOT_DIR / ".context"
 AGENT_DIR = ROOT_DIR / ".agent"
@@ -216,14 +218,14 @@ def main():
         with open(shard_path, "w", encoding="utf-8") as f:
             f.write(index_content)
 
-        print(f"✅ Generated {shard_path.name}")
+        safe_print(f"✅ Generated {shard_path.name}")
 
     # Archive the legacy monolithic file if it exists
     if TAG_INDEX_LEGACY_PATH.exists():
         archive_path = CONTEXT_DIR / "archive" / "TAG_INDEX_legacy.md"
         archive_path.parent.mkdir(parents=True, exist_ok=True)
         TAG_INDEX_LEGACY_PATH.rename(archive_path)
-        print(f"📦 Archived legacy TAG_INDEX.md to {archive_path}")
+        safe_print(f"📦 Archived legacy TAG_INDEX.md to {archive_path}")
 
     print(f"   Total: {len(tag_to_files)} unique tags indexed.")
 
@@ -240,11 +242,11 @@ def main():
                 timeout=30,
             )
             if result.returncode == 0:
-                print("✅ SKILL_INDEX.md auto-regenerated")
+                safe_print("✅ SKILL_INDEX.md auto-regenerated")
             else:
-                print(f"⚠️  SKILL_INDEX generation failed: {result.stderr[:100]}")
+                safe_print(f"⚠️  SKILL_INDEX generation failed: {result.stderr[:100]}")
         except Exception as e:
-            print(f"⚠️  SKILL_INDEX generation error: {e}")
+            safe_print(f"⚠️  SKILL_INDEX generation error: {e}")
 
 
 if __name__ == "__main__":

@@ -26,13 +26,15 @@ import time
 from pathlib import Path
 from typing import Dict, Optional
 
+from athena.utils.safe_print import safe_print
+
 try:
     from watchdog.events import FileSystemEventHandler
     from watchdog.observers import Observer
 except ImportError:
     Observer = None
     FileSystemEventHandler = object
-    print("⚠️ watchdog not installed. Run: pip install watchdog", file=sys.stderr)
+    safe_print("⚠️ watchdog not installed. Run: pip install watchdog", file=sys.stderr)
 
 from athena.core.config import (
     PROJECT_ROOT,
@@ -202,8 +204,8 @@ class Heartbeat:
     def start(self):
         """Start the file watcher daemon."""
         if Observer is None:
-            print("❌ Cannot start heartbeat: watchdog not installed", file=sys.stderr)
-            print("   Install with: pip install watchdog", file=sys.stderr)
+            safe_print("❌ Cannot start heartbeat: watchdog not installed", file=sys.stderr)
+            safe_print("   Install with: pip install watchdog", file=sys.stderr)
             return False
 
         setup_logging()
