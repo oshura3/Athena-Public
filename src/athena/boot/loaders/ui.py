@@ -1,6 +1,6 @@
 """
 UI Loader Module
-================
+===============
 
 Provides UI utilities for the Athena boot sequence, including
 section dividers and headers with color support.
@@ -12,16 +12,7 @@ Windows PowerShell Compatibility:
 """
 
 from athena.boot.constants import BOLD, CYAN, RESET
-
-# Check Unicode support at module load time
-# Import from __main__ to detect terminal capabilities
-_SUPPORTS_UNICODE = True
-try:
-    # Import the function from the CLI entry point
-    from athena.__main__ import supports_unicode
-    _SUPPORTS_UNICODE = supports_unicode()
-except Exception:
-    pass  # Fallback to Unicode if detection fails
+from athena.utils.safe_print import get_divider_char
 
 
 class UILoader:
@@ -33,12 +24,11 @@ class UILoader:
         
         Uses Unicode box-drawing character (─) on Unicode-capable terminals,
         falls back to ASCII dashes (-) on Windows PowerShell with cp1252/cp437 encoding.
+        
+        Note: Now uses get_divider_char() from shared safe_print module.
         """
-        # Use ASCII dashes on Windows if Unicode is not supported
-        if _SUPPORTS_UNICODE:
-            div_char = "─"  # Unicode box drawing horizontal
-        else:
-            div_char = "-"  # ASCII fallback for Windows PowerShell
+        # Use shared divider character from safe_print module
+        div_char = get_divider_char()
         
         print(f"\n{BOLD}{CYAN}{div_char * 60}{RESET}")
         print(f"{BOLD}{CYAN}{title}{RESET}")

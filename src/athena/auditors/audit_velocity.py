@@ -16,6 +16,8 @@ import json
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from athena.utils.safe_print import safe_print
+
 # Configuration
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 CONTEXT_DIR = PROJECT_ROOT / ".context"
@@ -57,19 +59,19 @@ def calculate_slope(days=7):
 def main():
     slope = calculate_slope(7)
     
-    print(f"📊 Velocity Audit: 7-Day Outcome Slope")
-    print(f"   Outcome Slope: {slope} points/day")
+    safe_print(f"📊 Velocity Audit: 7-Day Outcome Slope")
+    safe_print(f"   Outcome Slope: {slope} points/day")
     
     if slope == 0.0:
-        print("\n⚠️  WARNING: FLATLINE DETECTED (Slope 0.0)")
-        print("   No shipping events in 7 days.")
-        print("   ACTION: Immediate Execution Lock. You must SHIP or DECIDE today.")
+        safe_print("\n⚠️  WARNING: FLATLINE DETECTED (Slope 0.0)")
+        safe_print("   No shipping events in 7 days.")
+        safe_print("   ACTION: Immediate Execution Lock. You must SHIP or DECIDE today.")
     elif slope < 0.5:
-        print("\n⚠️  WARNING: DIMINISHING RETURNS")
-        print("   Slope is low (< 0.5). You are spinning.")
+        safe_print("\n⚠️  WARNING: DIMINISHING RETURNS")
+        safe_print("   Slope is low (< 0.5). You are spinning.")
     else:
-        print("\n✅ System Metabolic Status: HEALTHY")
-        print("   You are shipping.")
+        safe_print("\n✅ System Metabolic Status: HEALTHY")
+        safe_print("   You are shipping.")
 
 if __name__ == "__main__":
     main()

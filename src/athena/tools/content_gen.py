@@ -13,6 +13,8 @@ import re
 from pathlib import Path
 from typing import Dict, List
 
+from athena.utils.safe_print import safe_print
+
 # Fix sys.path for SDK access
 SDK_PATH = Path(__file__).resolve().parent.parent.parent
 if str(SDK_PATH) not in sys.path:
@@ -53,7 +55,7 @@ def generate_assets(keyword: str):
     Note: In a full implementation, this calls the LLM. 
     In this SDK shim, we provide a placeholder integration point.
     """
-    print(f"🛠️  Generating assets for: {keyword}")
+    safe_print(f"🛠️  Generating assets for: {keyword}")
     
     # Placeholder for actual LLM call (e.g. via athena.core.models)
     # Since this is a local tool, we output the prompt for the user to use in the AI chat
@@ -68,7 +70,7 @@ def generate_assets(keyword: str):
     final_prompt = PROMPT_TEMPLATE.replace("{keyword}", keyword)
     
     output_file.write_text(final_prompt, encoding="utf-8")
-    print(f"  ✅ Prompt Scaffolded: {output_file.relative_to(PROJECT_ROOT)}")
+    safe_print(f"  ✅ Prompt Scaffolded: {output_file.relative_to(PROJECT_ROOT)}")
 
 def main():
     parser = argparse.ArgumentParser(description="Athena Marketing Content Generator")

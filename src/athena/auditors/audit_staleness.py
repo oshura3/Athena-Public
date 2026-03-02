@@ -18,6 +18,8 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 
+from athena.utils.safe_print import safe_print
+
 # ── ANSI Colors ──
 CYAN = "\033[96m"
 GREEN = "\033[92m"
@@ -152,14 +154,14 @@ def scan_file_for_refs(filepath: Path) -> list[tuple[str, Path]]:
 
 def audit_staleness():
     """Run the staleness audit across all session logs."""
-    print(f"\n{BOLD}{CYAN}🔍 STALENESS DETECTOR{RESET}")
-    print(f"{CYAN}{'━' * 70}{RESET}")
-    print(
+    safe_print(f"\n{BOLD}{CYAN}🔍 STALENESS DETECTOR{RESET}")
+    safe_print(f"{CYAN}{'━' * 70}{RESET}")
+    safe_print(
         f"{DIM}Scanning session logs for references to files that changed after the session...{RESET}\n"
     )
 
     if not SESSION_LOG_DIR.exists():
-        print(f"{YELLOW}⚠️  No session logs found at {SESSION_LOG_DIR}{RESET}")
+        safe_print(f"{YELLOW}⚠️  No session logs found at {SESSION_LOG_DIR}{RESET}")
         return
 
     stale_refs = []
@@ -196,10 +198,10 @@ def audit_staleness():
         # Sort by staleness (most stale first)
         stale_refs.sort(key=lambda x: x["days_stale"], reverse=True)
 
-        print(
+        safe_print(
             f"{BOLD}{'Session':<35} {'Reference':<30} {'Days Stale':<12} {'Severity'}{RESET}"
         )
-        print(f"{'─' * 90}")
+        safe_print(f"{'─' * 90}")
 
         for ref in stale_refs:
             severity = (
@@ -217,25 +219,25 @@ def audit_staleness():
                 else GREEN
             )
 
-            print(
+            safe_print(
                 f"  {ref['session']:<33} "
                 f"{ref['reference']:<28} "
                 f"{ref['days_stale']:<10}d "
                 f"{severity_color}{severity}{RESET}"
             )
 
-        print(f"\n{'─' * 90}")
-        print(f"{BOLD}📊 Summary:{RESET}")
-        print(f"   References checked: {total_refs_checked}")
-        print(f"   {RED}Stale references:    {len(stale_refs)}{RESET}")
-        print(
+        safe_print(f"\n{'─' * 90}")
+        safe_print(f"{BOLD}📊 Summary:{RESET}")
+        safe_print(f"   References checked: {total_refs_checked}")
+        safe_print(f"   {RED}Stale references:    {len(stale_refs)}{RESET}")
+        safe_print(
             f"   {GREEN}Fresh references:    {total_refs_checked - len(stale_refs)}{RESET}"
         )
-        print(
+        safe_print(
             f"\n{YELLOW}💡 Stale references may contain outdated information. Re-evaluate in your next session.{RESET}"
         )
     else:
-        print(
+        safe_print(
             f"{GREEN}✅ All {total_refs_checked} references are fresh. No staleness detected.{RESET}"
         )
 

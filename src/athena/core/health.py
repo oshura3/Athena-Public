@@ -1,6 +1,7 @@
 from typing import Any
 
 from athena.memory.vectors import get_embedding, get_client
+from athena.utils.safe_print import safe_print
 
 
 class HealthCheck:
@@ -44,8 +45,8 @@ class HealthCheck:
     @classmethod
     def run_all(cls) -> bool:
         """Run all critical health checks and print results."""
-        print("\n🔍 SYSTEM HEALTH AUDIT")
-        print("─" * 30)
+        safe_print("\n🔍 SYSTEM HEALTH AUDIT")
+        safe_print("─" * 30)
 
         vector = cls.check_vector_api()
         v_status = (
@@ -53,7 +54,7 @@ class HealthCheck:
             if vector["status"] == "PASS"
             else f"❌ {vector.get('error')}"
         )
-        print(f"   Vectors:  {v_status}")
+        safe_print(f"   Vectors:  {v_status}")
 
         db = cls.check_database()
         db_status = (
@@ -61,9 +62,9 @@ class HealthCheck:
             if db["status"] == "PASS"
             else f"❌ {db.get('error')}"
         )
-        print(f"   Database: {db_status}")
+        safe_print(f"   Database: {db_status}")
 
-        print("─" * 30)
+        safe_print("─" * 30)
         return vector["status"] == "PASS" and db["status"] == "PASS"
 
 

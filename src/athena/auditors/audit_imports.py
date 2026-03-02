@@ -10,6 +10,8 @@ import sys
 from pathlib import Path
 from collections import defaultdict
 
+from athena.utils.safe_print import safe_print
+
 # Config
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 SCRIPTS_DIR = PROJECT_ROOT / ".agent" / "scripts"
@@ -35,7 +37,7 @@ def get_imports(file_path):
     return imports
 
 def audit_repo():
-    print("🔍 Auditing Imports...")
+    safe_print("🔍 Auditing Imports...")
     
     # 1. Map all scripts
     script_files = list(SCRIPTS_DIR.glob("*.py"))
@@ -63,26 +65,26 @@ def audit_repo():
             pass
 
     # Print Report
-    print(f"\n📊 Report: {len(script_files)} scripts analyzed.\n")
+    safe_print(f"\n📊 Report: {len(script_files)} scripts analyzed.\n")
     
     # Top Deps
     all_deps = [d for deps in dependencies.values() for d in deps]
     from collections import Counter
     top_deps = Counter(all_deps).most_common(10)
-    print("Top External Dependencies:")
+    safe_print("Top External Dependencies:")
     for dep, count in top_deps:
-        print(f"  - {dep}: {count}")
+        safe_print(f"  - {dep}: {count}")
         
     # Check for 'athena' usage
     athena_users = [s for s, deps in dependencies.items() if any(d.startswith("athena") for d in deps)]
-    print(f"\nScripts using 'athena' package: {len(athena_users)}")
+    safe_print(f"\nScripts using 'athena' package: {len(athena_users)}")
     
     # Future: True orphan detection requires iterating ALL files to see if a script is IMPORTED.
     # But scripts are usually ENTRY POINTS, so they aren't imported.
     # Orphans in scripts folder are scripts that are never EXECUTED.
     # That is harder to prove statically.
     
-    print("\n✅ Audit Complete.")
+    safe_print("\n✅ Audit Complete.")
 
 if __name__ == "__main__":
     audit_repo()

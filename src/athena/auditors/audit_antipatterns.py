@@ -20,6 +20,8 @@ from datetime import datetime
 from difflib import SequenceMatcher
 from pathlib import Path
 
+from athena.utils.safe_print import safe_print
+
 # ── ANSI Colors ──
 CYAN = "\033[96m"
 GREEN = "\033[92m"
@@ -205,26 +207,26 @@ def detect_unresolved_deferrals(session_files: list[Path]) -> list[dict]:
 
 def audit_antipatterns():
     """Run the anti-pattern audit."""
-    print(f"\n{BOLD}{CYAN}🔄 ANTI-PATTERN DETECTOR{RESET}")
-    print(f"{CYAN}{'━' * 70}{RESET}")
-    print(
+    safe_print(f"\n{BOLD}{CYAN}🔄 ANTI-PATTERN DETECTOR{RESET}")
+    safe_print(f"{CYAN}{'━' * 70}{RESET}")
+    safe_print(
         f"{DIM}Scanning session logs for repeated questions, unresolved deferrals, and thrashing...{RESET}\n"
     )
 
     if not SESSION_LOG_DIR.exists():
-        print(f"{YELLOW}⚠️  No session logs found at {SESSION_LOG_DIR}{RESET}")
+        safe_print(f"{YELLOW}⚠️  No session logs found at {SESSION_LOG_DIR}{RESET}")
         return
 
     session_files = sorted(SESSION_LOG_DIR.glob("*.md"))
     if not session_files:
-        print(f"{YELLOW}⚠️  No session logs found.{RESET}")
+        safe_print(f"{YELLOW}⚠️  No session logs found.{RESET}")
         return
 
     patterns_found = 0
 
     # ── 1. Repeated Questions ──
-    print(f"{BOLD}1. Repeated Questions{RESET}")
-    print(f"{DIM}   (Same question asked across {MIN_REPEAT_COUNT}+ sessions){RESET}\n")
+    safe_print(f"{BOLD}1. Repeated Questions{RESET}")
+    safe_print(f"{DIM}   (Same question asked across {MIN_REPEAT_COUNT}+ sessions){RESET}\n")
 
     all_questions = {}
     for f in session_files:
@@ -240,53 +242,53 @@ def audit_antipatterns():
     if repeated:
         for cluster in sorted(repeated, key=lambda x: x["count"], reverse=True):
             patterns_found += 1
-            print(f'   {RED}🔁 "{cluster["question"]}..."{RESET}')
-            print(
+            safe_print(f'   {RED}🔁 "{cluster["question"]}..."{RESET}')
+            safe_print(
                 f"      Appears in {cluster['count']} sessions: {', '.join(cluster['sessions'][:5])}"
             )
-        print()
+        safe_print()
     else:
-        print(f"   {GREEN}✅ No repeated questions detected.{RESET}\n")
+        safe_print(f"   {GREEN}✅ No repeated questions detected.{RESET}\n")
 
     # ── 2. Unresolved Deferrals ──
-    print(f"{BOLD}2. Unresolved Deferrals{RESET}")
-    print(f"{DIM}   (Items marked 'deferred' that never appear resolved){RESET}\n")
+    safe_print(f"{BOLD}2. Unresolved Deferrals{RESET}")
+    safe_print(f"{DIM}   (Items marked 'deferred' that never appear resolved){RESET}\n")
 
     unresolved = detect_unresolved_deferrals(session_files)
     if unresolved:
         # Show top 10
         for item in unresolved[:10]:
             patterns_found += 1
-            print(f"   {YELLOW}⏳ [{item['session']}] {item['item']}{RESET}")
+            safe_print(f"   {YELLOW}⏳ [{item['session']}] {item['item']}{RESET}")
         if len(unresolved) > 10:
-            print(f"   {DIM}   ... and {len(unresolved) - 10} more{RESET}")
-        print()
+            safe_print(f"   {DIM}   ... and {len(unresolved) - 10} more{RESET}")
+        safe_print()
     else:
-        print(f"   {GREEN}✅ No unresolved deferrals detected.{RESET}\n")
+        safe_print(f"   {GREEN}✅ No unresolved deferrals detected.{RESET}\n")
 
     # ── 3. Session Thrashing ──
-    print(f"{BOLD}3. Session Thrashing{RESET}")
-    print(f"{DIM}   (4+ sessions in a single day may indicate context loss){RESET}\n")
+    safe_print(f"{BOLD}3. Session Thrashing{RESET}")
+    safe_print(f"{DIM}   (4+ sessions in a single day may indicate context loss){RESET}\n")
 
     thrashing = detect_session_thrashing(session_files)
     if thrashing:
         for day in thrashing:
             patterns_found += 1
             color = RED if day["count"] >= 6 else YELLOW
-            print(f"   {color}⚡ {day['date']}: {day['count']} sessions{RESET}")
-        print()
+            safe_print(f"   {color}⚡ {day['date']}: {day['count']} sessions{RESET}")
+        safe_print()
     else:
-        print(f"   {GREEN}✅ No session thrashing detected.{RESET}\n")
+        safe_print(f"   {GREEN}✅ No session thrashing detected.{RESET}\n")
 
     # ── Summary ──
-    print(f"{'─' * 70}")
+    safe_print(f"{'─' * 70}")
     if patterns_found > 0:
-        print(f"{BOLD}📊 {patterns_found} anti-pattern(s) detected.{RESET}")
-        print(
+        safe_print(f"{BOLD}📊 {patterns_found} anti-pattern(s) detected.{RESET}")
+        safe_print(
             f"{YELLOW}💡 Review flagged items to reduce wasted tokens and improve session quality.{RESET}"
         )
     else:
-        print(
+        safe_print(
             f"{GREEN}{BOLD}✅ No anti-patterns detected. Clean session history!{RESET}"
         )
 

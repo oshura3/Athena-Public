@@ -10,6 +10,8 @@ from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
 
+from athena.utils.safe_print import safe_print
+
 sys.path.insert(0, str(Path(__file__).parent))
 from gemini_client import get_client
 
@@ -97,10 +99,10 @@ def main():
         print(f"Error: File not found: {session_file}")
         sys.exit(1)
 
-    print(f"📄 Reading: {session_file}")
+    safe_print(f"📄 Reading: {session_file}")
     content = session_file.read_text(encoding="utf-8")
     
-    print("🤖 Generating case study...")
+    safe_print("🤖 Generating case study...")
     title, case_study = generate_case_study(content)
     
     if args.dry_run:
@@ -118,7 +120,7 @@ def main():
         output_file = CASE_STUDY_DIR / f"CS_{timestamp}_{safe_title}.md"
 
     output_file.write_text(case_study, encoding="utf-8")
-    print(f"✅ Saved: {output_file}")
+    safe_print(f"✅ Saved: {output_file}")
 
 if __name__ == "__main__":
     main()

@@ -7,6 +7,8 @@ Filters out sensitive entity names before generating the HTML.
 import json
 from pathlib import Path
 
+from athena.utils.safe_print import safe_print
+
 # Sensitive keywords to filter out
 NSFW_KEYWORDS = [
     '[CONFIGURE_YOUR_OWN_BLOCKLIST]', 
@@ -180,8 +182,8 @@ def generate_sfw_graph():
     html = html.replace('EDGES_DATA', json.dumps(edges_data))
     
     OUTPUT_FILE.write_text(html)
-    print(f"\n✅ Generated: {OUTPUT_FILE}")
-    print(f"   Nodes: {len(nodes_data)}, Edges: {len(edges_data)}")
+    safe_print(f"\n✅ Generated: {OUTPUT_FILE}")
+    safe_print(f"   Nodes: {len(nodes_data)}, Edges: {len(edges_data)}")
 
 if __name__ == "__main__":
     generate_sfw_graph()

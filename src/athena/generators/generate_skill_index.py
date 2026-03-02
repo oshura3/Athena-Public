@@ -8,6 +8,8 @@ import os
 import sys
 from pathlib import Path
 
+from athena.utils.safe_print import safe_print
+
 ROOT_DIR = Path(__file__).parent.parent.parent.parent
 SKILLS_DIR = ROOT_DIR / ".agent/skills"
 OUTPUT_FILE = SKILLS_DIR / "SKILL_INDEX.md"
@@ -110,7 +112,7 @@ def main():
     with open(OUTPUT_FILE, "w") as f:
         f.write("\n".join(lines))
 
-    print(f"✅ Generated {OUTPUT_FILE}")
+    safe_print(f"✅ Generated {OUTPUT_FILE}")
 
 
 if __name__ == "__main__":

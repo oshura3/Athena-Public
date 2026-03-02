@@ -8,13 +8,14 @@ from athena.boot.constants import (
     RED, YELLOW, BOLD, DIM, RESET
 )
 from athena.boot.loaders.ui import UILoader
+from athena.utils.safe_print import safe_print
 
 class StateLoader:
     @staticmethod
     def boot_timeout_handler(signum, frame):
         """Handle boot timeout - trigger safe mode and dump forensics."""
         print(f"\n{RED}{'=' * 60}{RESET}")
-        print(f"{RED}{BOLD}⚠️  BOOT TIMEOUT - {BOOT_TIMEOUT_SECONDS}s EXCEEDED{RESET}")
+        safe_print(f"{RED}{BOLD}⚠️  BOOT TIMEOUT - {BOOT_TIMEOUT_SECONDS}s EXCEEDED{RESET}")
         print(f"{RED}{'=' * 60}{RESET}")
         
         # Dump crash report
@@ -56,7 +57,7 @@ class StateLoader:
                 timestamp = report.get("timestamp", "unknown")
                 reason = report.get("reason", "unknown")
                 print(f"\n{YELLOW}{'=' * 60}{RESET}")
-                print(f"{YELLOW}⚠️  RECOVERED FROM PRIOR CRASH{RESET}")
+                safe_print(f"{YELLOW}⚠️  RECOVERED FROM PRIOR CRASH{RESET}")
                 print(f"{YELLOW}{'=' * 60}{RESET}")
                 print(f"   Timestamp: {timestamp}")
                 print(f"   Reason: {reason}")

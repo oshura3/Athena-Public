@@ -14,6 +14,8 @@ import sys
 from pathlib import Path
 from typing import Set, List
 
+from athena.utils.safe_print import safe_print
+
 # Fix sys.path for SDK access
 SDK_PATH = Path(__file__).resolve().parent.parent.parent
 if str(SDK_PATH) not in sys.path:
@@ -102,7 +104,7 @@ class SyncOrchestrator:
 
     def execute_sync(self):
         """Perform the actual file operations."""
-        print(f"🔄 Syncing {len(self.to_sync)} files to {PUBLIC_REPO_ROOT.name}...")
+        safe_print(f"🔄 Syncing {len(self.to_sync)} files to {PUBLIC_REPO_ROOT.name}...")
         
         for source in self.to_sync:
             # Find destination
@@ -123,7 +125,7 @@ class SyncOrchestrator:
                 content = source.read_text(encoding="utf-8")
                 sanitized = self.sanitize_content(content, source)
                 dest.write_text(sanitized, encoding="utf-8")
-                print(f"  ✅ Published: {dest.relative_to(PUBLIC_REPO_ROOT)}")
+                safe_print(f"  ✅ Published: {dest.relative_to(PUBLIC_REPO_ROOT)}")
             else:
                 print(f"  [DRY] Would publish: {dest.relative_to(PUBLIC_REPO_ROOT)}")
 

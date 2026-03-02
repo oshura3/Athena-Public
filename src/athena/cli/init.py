@@ -23,6 +23,9 @@ import os
 from datetime import datetime
 from pathlib import Path
 
+# Import shared safe_print utility for Windows console compatibility
+from athena.utils.safe_print import safe_print
+
 
 def supports_unicode() -> bool:
     """Check if the terminal supports Unicode output."""

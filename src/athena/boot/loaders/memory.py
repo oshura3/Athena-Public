@@ -13,6 +13,7 @@ from athena.boot.constants import (
     DIM,
     RESET,
 )
+from athena.utils.safe_print import safe_print
 
 
 class MemoryLoader:
@@ -28,7 +29,7 @@ class MemoryLoader:
 
         latest_file = files[-1]
         filename = latest_file.name
-        print(f"⏮️  Last Session: {BOLD}{filename}{RESET}")
+        safe_print(f"⏮️  Last Session: {BOLD}{filename}{RESET}")
 
         try:
             content = latest_file.read_text(encoding="utf-8")
@@ -55,9 +56,9 @@ class MemoryLoader:
                             deferred_items.append(f"📋 {parts[1]}")
 
             if deferred_items:
-                print(f"\n   {YELLOW}📌 Deferred from last session:{RESET}")
+                safe_print(f"\n   {YELLOW}📌 Deferred from last session:{RESET}")
                 for item in deferred_items[:3]:
-                    print(f"      {item}")
+                    safe_print(f"      {item}")
 
         except Exception:
             pass
@@ -73,10 +74,10 @@ class MemoryLoader:
 
             session_path = cs.create_session_log()
             session_id = session_path.stem
-            print(f"{GREEN}✅ Created: {session_id}{RESET}")
+            safe_print(f"{GREEN}✅ Created: {session_id}{RESET}")
             return session_id
         except Exception as e:
-            print(f"{RED}❌ Failed to create session: {e}{RESET}")
+            safe_print(f"{RED}❌ Failed to create session: {e}{RESET}")
             sys.exit(1)
 
     @staticmethod
@@ -87,14 +88,14 @@ class MemoryLoader:
         time_str = now.strftime("%H:%M")
         day_of_week = now.strftime("%A")
         week_num = now.isocalendar()[1]
-        print(f"📅 Date: {BOLD}{day_of_week}, {date_str}{RESET}")
-        print(f"   Time: {time_str} SGT | Week {week_num}")
+        safe_print(f"📅 Date: {BOLD}{day_of_week}, {date_str}{RESET}")
+        safe_print(f"   Time: {time_str} SGT | Week {week_num}")
 
     @staticmethod
     def prime_semantic():
         """Run semantic search silently."""
         if not SUPABASE_SEARCH_SCRIPT.exists():
-            print(f"{YELLOW}⚠️ Semantic search skipped (script not found){RESET}")
+            safe_print(f"{YELLOW}⚠️ Semantic search skipped (script not found){RESET}")
             return False
 
         try:
@@ -105,13 +106,13 @@ class MemoryLoader:
                 timeout=60,
             )
             if result.returncode == 0:
-                print(f"{GREEN}✅ Semantic memory primed{RESET}")
+                safe_print(f"{GREEN}✅ Semantic memory primed{RESET}")
                 return True
             else:
-                print(f"{YELLOW}⚠️ Semantic search returned non-zero{RESET}")
+                safe_print(f"{YELLOW}⚠️ Semantic search returned non-zero{RESET}")
                 return False
         except Exception as e:
-            print(f"{YELLOW}⚠️ Semantic search error: {e}{RESET}")
+            safe_print(f"{YELLOW}⚠️ Semantic search error: {e}{RESET}")
             return False
 
     @staticmethod
@@ -126,11 +127,11 @@ class MemoryLoader:
                     run_search(query, limit=5, json_output=True)
                 except Exception:
                     pass  # Best effort
-            print(
+            safe_print(
                 f"{GREEN}🔥 Search cache pre-warmed ({len(hot_queries)} queries){RESET}"
             )
         except Exception as e:
-            print(f"{YELLOW}⚠️ Cache pre-warm skipped: {e}{RESET}")
+            safe_print(f"{YELLOW}⚠️ Cache pre-warm skipped: {e}{RESET}")
 
     @staticmethod
     def display_learnings_snapshot():
@@ -150,7 +151,7 @@ class MemoryLoader:
                 if "likes_enforcement_warnings: true" in content:
                     prefs.append("enforcement warnings")
                 if prefs:
-                    print(f"\n{DIM}📋 User Prefs: {', '.join(prefs[:3])}{RESET}")
+                    safe_print(f"\n{DIM}📋 User Prefs: {', '.join(prefs[:3])}{RESET}")
             except Exception:
                 pass
 
@@ -162,7 +163,7 @@ class MemoryLoader:
                 ]
                 if rows:
                     recent = rows[-2:]
-                    print(f"{DIM}📚 Recent Learnings:{RESET}")
+                    safe_print(f"{DIM}📚 Recent Learnings:{RESET}")
                     for row in recent:
                         parts = [p.strip() for p in row.split("|")]
                         if len(parts) >= 4:
@@ -171,6 +172,6 @@ class MemoryLoader:
                                 if len(parts[3]) > 60
                                 else parts[3]
                             )
-                            print(f"   {DIM}• {learning}{RESET}")
+                            safe_print(f"   {DIM}• {learning}{RESET}")
             except Exception:
                 pass
