@@ -9,6 +9,8 @@ import sys
 import re
 from pathlib import Path
 
+from athena.utils.safe_print import safe_print
+
 # Destructive patterns that trigger a Hard Veto
 RUINOUS_PATTERNS = [
     r"rm -rf \.context",
@@ -37,10 +39,10 @@ def main():
 
     cmd = " ".join(sys.argv[1:])
     if not check_command(cmd):
-        print("🚨 RUIN CHECK FAIL: Action blocked by Law #1 (No Irreversible Ruin).")
+        safe_print("🚨 RUIN CHECK FAIL: Action blocked by Law #1 (No Irreversible Ruin).")
         sys.exit(1)
 
-    print("✅ Action safe.")
+    safe_print("✅ Action safe.")
     sys.exit(0)
 
 

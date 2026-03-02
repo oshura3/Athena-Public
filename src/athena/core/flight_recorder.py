@@ -11,6 +11,8 @@ import os
 from pathlib import Path
 from typing import Any, Dict
 
+from athena.utils.safe_print import safe_print
+
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 LOG_FILE = PROJECT_ROOT / ".athena" / "flight_recorder.jsonl"
 
@@ -40,7 +42,7 @@ def record_action(
             f.write(json.dumps(entry) + "\n")
     except Exception as e:
         # We don't want to crash the system if logging fails, but it's a blind spot.
-        print(f"⚠️ Flight Recorder Failure: {e}")
+        safe_print(f"⚠️ Flight Recorder Failure: {e}")
 
 
 if __name__ == "__main__":

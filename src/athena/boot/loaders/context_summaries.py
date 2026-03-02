@@ -21,6 +21,7 @@ import logging
 from pathlib import Path
 
 from athena.boot.constants import DIM, GREEN, PROJECT_ROOT, RESET
+from athena.utils.safe_print import safe_print
 
 logger = logging.getLogger("athena.boot.context_summaries")
 
@@ -180,6 +181,6 @@ def display_summary_status(summaries: dict):
     for name, summary in summaries.items():
         preview = summary[:60] + "..." if len(summary) > 60 else summary
         if summary:
-            print(f"   {DIM}   ✅ {name}: {preview}{RESET}")
+            safe_print(f"   {DIM}   ✅ {name}: {preview}{RESET}")
         else:
-            print(f"   {DIM}   ⚠️  {name}: (empty/missing){RESET}")
+            safe_print(f"   {DIM}   ⚠️  {name}: (empty/missing){RESET}")

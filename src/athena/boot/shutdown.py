@@ -18,6 +18,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+from athena.utils.safe_print import safe_print
+
 
 def find_current_session(logs_dir: Path) -> Optional[Path]:
     """Find the most recent session log for today."""
@@ -33,7 +35,7 @@ def close_session(session_file: Path) -> bool:
     Returns True if successful.
     """
     if not session_file.exists():
-        print(f"❌ Session file not found: {session_file}")
+        safe_print(f"❌ Session file not found: {session_file}")
         return False
 
     content = session_file.read_text()
@@ -64,7 +66,7 @@ def close_session(session_file: Path) -> bool:
 """
 
     session_file.write_text(content)
-    print(f"✅ Session closed: {session_file.name}")
+    safe_print(f"✅ Session closed: {session_file.name}")
     return True
 
 
@@ -88,9 +90,9 @@ def run_shutdown(project_root: Optional[Path] = None) -> bool:
         else:
             project_root = current
 
-    print("━" * 60)
-    print("🔚 ATHENA SHUTDOWN SEQUENCE")
-    print("━" * 60)
+    safe_print("━" * 60)
+    safe_print("🔚 ATHENA SHUTDOWN SEQUENCE")
+    safe_print("━" * 60)
 
     # Check multiple possible session log locations
     possible_dirs = [
@@ -106,8 +108,8 @@ def run_shutdown(project_root: Optional[Path] = None) -> bool:
                 break
 
     if not session_file:
-        print("⚠️  No active session found for today")
-        print("   (Run /start first to create a session)")
+        safe_print("⚠️  No active session found for today")
+        safe_print("   (Run /start first to create a session)")
         return True  # Not an error, just no session
 
     # Close the session
@@ -120,18 +122,18 @@ def run_shutdown(project_root: Optional[Path] = None) -> bool:
 
             audit_observations(append_to_log=True)
         except Exception as e:
-            print(f"   ⚠️  Observation report skipped: {e}")
+            safe_print(f"   ⚠️  Observation report skipped: {e}")
 
         # Optional: Trigger Supabase sync if configured
         supabase_url = os.getenv("SUPABASE_URL")
         if supabase_url:
-            print(
+            safe_print(
                 "🔄 Supabase sync available (run manually: python -m athena.memory.sync)"
             )
 
-        print("━" * 60)
-        print("✅ ATHENA SHUTDOWN COMPLETE")
-        print("━" * 60)
+        safe_print("━" * 60)
+        safe_print("✅ ATHENA SHUTDOWN COMPLETE")
+        safe_print("━" * 60)
 
     return success
 

@@ -1,17 +1,28 @@
 // PR submitted as issue #26 on 03/02/2026@1015 EST
 
 # Title
-**PR: Windows PowerShell Compatibility for CLI Output**
+## Description
 
-## Summary
 This PR adds Windows PowerShell compatibility for the Athena CLI, fixing UnicodeEncodeError when running `athena check` and other commands in Kilo Code terminal on Windows.
 
-## The Problem
-When running Athena CLI commands (like `athena check`) in Kilo Code's integrated terminal on Windows, users encountered:
-- `UnicodeEncodeError: 'charmap' codec can't encode character...`
-- The error occurred because Windows PowerShell uses cp1252 encoding by default, which doesn't support many emojis and Unicode characters used in the CLI output
+## Motivation
 
-edit: discovered MANY other files have the same issue as this file. creating separate branch 
+I kept encountering issues when running Athena CLI commands (like `athena check`) in Kilo Code's integrated terminal on Windows. The error typically encountered was `UnicodeEncodeError: 'charmap' codec can't encode character...`
+- The error occurred because Windows PowerShell (in VScode's Kilo Code instance) uses cp1252 encoding by default, which doesn't support many emojis and Unicode characters used in the CLI output 
+
+Edit: 
+- working to fix the following: apply Windows console Unicode encoding fix to cli/init.py
+
+Root cause: Windows consoles (cp1252, cp437) cannot encode emoji characters,
+causing UnicodeEncodeError when running 'athena init' or other CLI commands. (this PR is technically supposed to have 3 files changed. hopefully it works correctly)
+
+This adds the same safe_print() function already present in __main__.py
+to handle emoji-to-ASCII fallback on limited Windows encodings.
+
+Note: 25+ other files in src/athena/ still need this fix.
+A follow-up branch with comprehensive fixes is planned.
+
+Closes # n/a (as per "Issues" page, I'm submitting a PR with a suggested resolution/correction already)
 
 ## What We Tried
 1. **Initial approach**: Tried using Git rebase to sync with upstream - failed due to 40+ merge conflicts

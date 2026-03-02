@@ -9,6 +9,7 @@ import sys
 import time
 from typing import List, Optional
 from athena.core.models import SearchResult
+from athena.utils.safe_print import safe_print
 
 # Operational Default: Lazy load model
 _model = None
@@ -55,5 +56,5 @@ def rerank_results(query: str, results: List[SearchResult], top_k: int = 5) -> L
         return reranked[:top_k]
         
     except Exception as e:
-        print(f"   ⚠️  Reranking failed: {e}", file=sys.stderr)
+        safe_print(f"   ⚠️  Reranking failed: {e}", file=sys.stderr)
         return results[:top_k]

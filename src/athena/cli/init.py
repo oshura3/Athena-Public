@@ -23,65 +23,8 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-
-def supports_unicode() -> bool:
-    """Check if the terminal supports Unicode output."""
-    if sys.platform == "win32":
-        try:
-            if sys.stdout.encoding:
-                encoding = sys.stdout.encoding.lower()
-                if "cp1252" in encoding or encoding == "cp437":
-                    return False
-        except Exception:
-            pass
-        if os.environ.get("PYTHONIOENCODING"):
-            encoding = os.environ.get("PYTHONIOENCODING", "").lower()
-            if "cp1252" in encoding or encoding == "cp437":
-                return False
-    return True
-
-
-_SUPPORTS_UNICODE = supports_unicode()
-
-
-def get_emoji_fallback():
-    """Return emoji-to-ASCII fallback mapping for Windows consoles."""
-    return {
-        "🩺": "[CHECK]",
-        "✅": "[OK]",
-        "⚠️": "[WARNING]",
-        "❌": "[ERROR]",
-        "🔑": "[KEY]",
-        "📚": "[DOCS]",
-        "📦": "[PKG]",
-        "🚀": "[LAUNCH]",
-        "🛑": "[STOP]",
-        "💾": "[SAVE]",
-        "⚙️": "[SETUP]",
-        "🔍": "[SEARCH]",
-        "🧠": "[ATHENA]",
-        "🌐": "[NET]",
-        "💻": "[DEV]",
-        "📊": "[STATS]",
-        "⏱️": "[TIME]",
-        "✨": "[NEW]",
-        "🔄": "[REFRESH]",
-        "📝": "[NOTE]",
-        "🎯": "[TARGET]",
-        "🏗️": "[BUILD]",
-        "🧪": "[TEST]",
-        "⏭️": "[SKIP]",
-        "📁": "[DIR]",
-    }
-
-
-def safe_print(text: str):
-    """Print text with emoji fallback on non-Unicode consoles."""
-    if not _SUPPORTS_UNICODE:
-        emoji_map = get_emoji_fallback()
-        for emoji, replacement in emoji_map.items():
-            text = text.replace(emoji, replacement)
-    print(text)
+# Import shared safe_print utility for Windows console compatibility
+from athena.utils.safe_print import safe_print
 
 
 # --- Templates ---

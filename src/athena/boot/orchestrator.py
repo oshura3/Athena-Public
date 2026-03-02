@@ -18,6 +18,7 @@ from athena.boot.constants import (
     DIM,
     RESET,
 )
+from athena.utils.safe_print import safe_print
 
 
 def main():
@@ -53,11 +54,11 @@ def main():
         from athena.core.security import patch_dspy_cache_security
 
         patch_dspy_cache_security()
-        print(f"   🛡️  Security: DiskCache mitigation active.")
+        safe_print(f"   🛡️  Security: DiskCache mitigation active.")
     except ImportError:
         pass
     except Exception as e:
-        print(f"   ⚠️  Security Patch Failed: {e}")
+        safe_print(f"   ⚠️  Security Patch Failed: {e}")
 
     StateLoader.check_prior_crashes()
     StateLoader.check_canary_overdue()
@@ -70,7 +71,7 @@ def main():
         with open(last_boot_log, "w") as f:
             f.write(datetime.now().isoformat())
     except Exception as e:
-        print(f"   ⚠️  Boot Log Update Fail: {e}")
+        safe_print(f"   ⚠️  Boot Log Update Fail: {e}")
 
     # Phase 2: Integrity
     if not IdentityLoader.verify_semantic_prime():
@@ -113,7 +114,7 @@ def main():
 
     def run_health_check_wrapper():
         if not HealthCheck.run_all():
-            print(
+            safe_print(
                 f"{RED}⚠️  System health check failed. Proceeding with caution...{RESET}"
             )
 
@@ -162,20 +163,20 @@ def main():
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
-        print("   🛡️  Sidecar Launched (PID: Independent)")
+        safe_print("   🛡️  Sidecar Launched (PID: Independent)")
     except Exception as e:
-        print(f"   ⚠️  Sidecar Fail: {e}")
+        safe_print(f"   ⚠️  Sidecar Fail: {e}")
 
     # Disable watchdog
     StateLoader.disable_watchdog()
 
     # Final Summary
-    print(f"\n{BOLD}{'─' * 60}{RESET}")
-    print(f"{GREEN}{BOLD}⚡ Ready.{RESET} Session: {session_id}")
-    print(
+    safe_print(f"\n{BOLD}{'─' * 60}{RESET}")
+    safe_print(f"{GREEN}{BOLD}⚡ Ready.{RESET} Session: {session_id}")
+    safe_print(
         f"{DIM}⚖️  Law #6 Reminder: Run 'python3 .agent/scripts/quicksave.py \"...\"' after completing work.{RESET}"
     )
-    print(f"{BOLD}{'─' * 60}{RESET}\n")
+    safe_print(f"{BOLD}{'─' * 60}{RESET}\n")
 
     # Display Token Budget Gauge
     display_gauge(token_counts)

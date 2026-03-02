@@ -15,6 +15,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+from athena.utils.safe_print import safe_print
+
 
 def find_current_session(logs_dir: Path) -> Optional[Path]:
     """Find the most recent session log for today."""
@@ -61,7 +63,7 @@ def run_quicksave(summary: str, project_root: Optional[Path] = None) -> bool:
                 break
 
     if not session_file:
-        print(f"⚠️ No session log found for today")
+        safe_print(f"⚠️ No session log found for today")
         print("   (Run /start or `python -m athena` first to create a session)")
         return False
 
@@ -71,7 +73,7 @@ def run_quicksave(summary: str, project_root: Optional[Path] = None) -> bool:
     with open(session_file, "a") as f:
         f.write(checkpoint)
 
-    print(f"✅ Quicksave [{timestamp}] → {session_file.name}")
+    safe_print(f"✅ Quicksave [{timestamp}] → {session_file.name}")
     return True
 
 

@@ -15,6 +15,8 @@ import hashlib
 from pathlib import Path
 from datetime import datetime
 
+from athena.utils.safe_print import safe_print
+
 # Configuration
 WORKSPACE = Path(__file__).resolve().parent.parent.parent
 SESSIONS_DIR = WORKSPACE / ".context" / "memories" / "session_logs"
@@ -78,8 +80,8 @@ def extract_date(filename: str) -> str:
 
 
 def main():
-    print("📋 SESSION TL;DR GENERATOR")
-    print("=" * 50)
+    safe_print("📋 SESSION TL;DR GENERATOR")
+    safe_print("=" * 50)
 
     # Ensure output directory exists
     OUTPUT_JSON.parent.mkdir(parents=True, exist_ok=True)
@@ -109,7 +111,7 @@ def main():
                 "path": str(file_path.relative_to(WORKSPACE)),
             }
         except Exception as e:
-            print(f"   ⚠️ Error processing {file_path.name}: {e}")
+            safe_print(f"   ⚠️ Error processing {file_path.name}: {e}")
 
     # Check if content changed (lazy update)
     new_content = json.dumps(tldrs, indent=2, ensure_ascii=False)
@@ -117,12 +119,12 @@ def main():
         existing_hash = hashlib.md5(OUTPUT_JSON.read_bytes()).hexdigest()
         new_hash = hashlib.md5(new_content.encode()).hexdigest()
         if existing_hash == new_hash:
-            print("⏭️ SESSION_TLDRS unchanged, skipping regeneration")
+            safe_print("⏭️ SESSION_TLDRS unchanged, skipping regeneration")
             return
 
     # Write JSON
     OUTPUT_JSON.write_text(new_content, encoding="utf-8")
-    print(f"✅ Wrote {len(tldrs)} entries to {OUTPUT_JSON}")
+    safe_print(f"✅ Wrote {len(tldrs)} entries to {OUTPUT_JSON}")
 
     # Write Markdown summary
     md_content = f"""# Session TL;DRs (Quick Reference)
@@ -149,7 +151,7 @@ def main():
 """
 
     OUTPUT_MD.write_text(md_content, encoding="utf-8")
-    print(f"✅ Wrote summary to {OUTPUT_MD}")
+    safe_print(f"✅ Wrote summary to {OUTPUT_MD}")
 
 
 if __name__ == "__main__":

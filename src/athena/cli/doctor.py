@@ -25,6 +25,8 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from athena.utils.safe_print import safe_print
+
 # ─── ANSI Colors ─────────────────────────────────────────────
 GREEN = "\033[92m"
 CYAN = "\033[96m"
@@ -677,12 +679,12 @@ def run_doctor(
     json_output: list[dict] = []
 
     if not quiet and not output_json:
-        print(f"\n{BOLD}{CYAN}{'═' * 60}{RESET}")
-        print(f"{BOLD}{CYAN}  🩺 ATHENA DOCTOR — System Diagnostics{RESET}")
-        print(f"{BOLD}{CYAN}{'═' * 60}{RESET}")
+        safe_print(f"\n{BOLD}{CYAN}{'═' * 60}{RESET}")
+        safe_print(f"{BOLD}{CYAN}  🩺 ATHENA DOCTOR — System Diagnostics{RESET}")
+        safe_print(f"{BOLD}{CYAN}{'═' * 60}{RESET}")
         print(f"   {DIM}Root: {root}{RESET}")
         if fix:
-            print(f"   {GREEN}🔧 Auto-fix mode enabled{RESET}")
+            safe_print(f"   {GREEN}🔧 Auto-fix mode enabled{RESET}")
         print()
 
     for section_name, check_fn in ALL_CHECKS:

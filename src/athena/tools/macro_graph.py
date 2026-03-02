@@ -10,6 +10,8 @@ from pathlib import Path
 import os
 import sys
 
+from athena.utils.safe_print import safe_print
+
 # SDK Imports
 SDK_PATH = Path(__file__).resolve().parent.parent.parent
 if str(SDK_PATH) not in sys.path:
@@ -83,7 +85,7 @@ def generate_mermaid() -> str:
 
 def regenerate_file():
     """Write the new graph to the KB."""
-    print("🕸️ Regenerating Macro Knowledge Graph...")
+    safe_print("🕸️ Regenerating Macro Knowledge Graph...")
     mermaid = generate_mermaid()
 
     content = f"""# Workspace Knowledge Graph (Macro View)
@@ -113,7 +115,7 @@ def regenerate_file():
 #documentation #knowledge-graph #automated
 """
     GRAPH_FILE.write_text(content, encoding="utf-8")
-    print(f"✅ Knowledge Graph updated: {GRAPH_FILE.relative_to(PROJECT_ROOT)}")
+    safe_print(f"✅ Knowledge Graph updated: {GRAPH_FILE.relative_to(PROJECT_ROOT)}")
 
 
 if __name__ == "__main__":
