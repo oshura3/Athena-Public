@@ -13,10 +13,20 @@ Usage:
     athena save "summary"      # Quicksave checkpoint
     athena --version           # Show version
     athena --help              # Show help
+
+Windows PowerShell Compatibility:
+    On Windows consoles with limited encoding (cp1252, cp437), this module
+    automatically detects the limitation and provides ASCII fallbacks for
+    emojis and Unicode characters to prevent UnicodeEncodeError.
+    
+    The `supports_unicode()` function detects the terminal encoding, and
+    `safe_print()` automatically replaces emojis with ASCII alternatives
+    like [CHECK], [OK], [WARNING], etc.
 """
 
 import argparse
 import sys
+import os
 from pathlib import Path
 
 # Load environment variables FIRST (critical fix)
@@ -28,42 +38,123 @@ except ImportError:
     pass  # dotenv is optional for minimal installs
 
 
+def supports_unicode() -> bool:
+    """Check if the terminal supports Unicode output.
+    
+    Returns False on Windows consoles with limited encoding (cp1252, cp437, etc.)
+    to prevent UnicodeEncodeError when printing emojis and special characters.
+    """
+    if sys.platform == "win32":
+        # Check Windows console encoding
+        try:
+            # Try to get the console output encoding
+            if sys.stdout.encoding:
+                encoding = sys.stdout.encoding.lower()
+                # cp1252 (Windows Western European) doesn't support many emojis
+                # cp437 (DOS) doesn't support Unicode
+                if "cp1252" in encoding or encoding == "cp437":
+                    return False
+        except Exception:
+            pass
+        # Also check environment variable that PowerShell sets
+        if os.environ.get("PYTHONIOENCODING"):
+            encoding = os.environ.get("PYTHONIOENCODING", "").lower()
+            if "cp1252" in encoding or encoding == "cp437":
+                return False
+    return True
+
+
+# Unicode support detection - computed once at module load
+_SUPPORTS_UNICODE = supports_unicode()
+
+
+def get_emoji_fallback():
+    """Return emoji-to-ASCII fallback mapping for Windows consoles.
+    
+    This maps common emojis used in the CLI to ASCII alternatives.
+    """
+    return {
+        "🩺": "[CHECK]",
+        "✅": "[OK]",
+        "⚠️": "[WARNING]",
+        "❌": "[ERROR]",
+        "🔑": "[KEY]",
+        "📚": "[DOCS]",
+        "📦": "[PKG]",
+        "🚀": "[LAUNCH]",
+        "🛑": "[STOP]",
+        "💾": "[SAVE]",
+        "⚙️": "[SETUP]",
+        "🔍": "[SEARCH]",
+        "🧠": "[ATHENA]",
+        "🌐": "[NET]",
+        "💻": "[DEV]",
+        "📊": "[STATS]",
+        "⏱️": "[TIME]",
+        "✨": "[NEW]",
+        "🔄": "[REFRESH]",
+        "📝": "[NOTE]",
+        "🎯": "[TARGET]",
+        "🏗️": "[BUILD]",
+        "🧪": "[TEST]",
+        "✅": "[DONE]",
+        "❓": "[?]",
+        "➡️": "->",
+        "⬅️": "<-",
+        "©": "(c)",
+        "®": "(r)",
+        "™": "(tm)",
+    }
+
+
+def safe_print(text: str):
+    """Print text with emoji fallback on non-Unicode consoles.
+    
+    If Unicode is not supported, replaces emojis with ASCII alternatives.
+    """
+    if not _SUPPORTS_UNICODE:
+        emoji_map = get_emoji_fallback()
+        for emoji, replacement in emoji_map.items():
+            text = text.replace(emoji, replacement)
+    print(text)
+
+
 def run_check():
     """Run system health diagnostics."""
     from athena import __version__
 
-    print("🩺 ATHENA SYSTEM CHECK")
+    safe_print("🩺 ATHENA SYSTEM CHECK")
     print("=" * 60)
     print(f"   CLI Version: {__version__}")
 
     # Check for .athena_root marker
     root_marker = Path.cwd() / ".athena_root"
     if root_marker.exists():
-        print("   ✅ Workspace marker: Found")
+        safe_print("   ✅ Workspace marker: Found")
     else:
-        print("   ⚠️  Workspace marker: Missing (run `athena init .` first)")
+        safe_print("   ⚠️  Workspace marker: Missing (run `athena init .` first)")
 
     # Check key directories
     dirs_to_check = [".agent", ".context", ".framework"]
     for d in dirs_to_check:
         if (Path.cwd() / d).exists():
-            print(f"   ✅ {d}/: Found")
+            safe_print(f"   ✅ {d}/: Found")
         else:
-            print(f"   ❌ {d}/: Missing")
+            safe_print(f"   ❌ {d}/: Missing")
 
     # Check environment variables
     import os
 
     env_vars = ["SUPABASE_URL", "SUPABASE_ANON_KEY", "ANTHROPIC_API_KEY"]
-    print("\n🔑 Environment Variables:")
+    safe_print("\n🔑 Environment Variables:")
     for var in env_vars:
         if os.getenv(var):
-            print(f"   ✅ {var}: Set")
+            safe_print(f"   ✅ {var}: Set")
         else:
-            print(f"   ⚠️  {var}: Not set (optional for cloud features)")
+            safe_print(f"   ⚠️  {var}: Not set (optional for cloud features)")
 
     print("\n" + "=" * 60)
-    print("📚 Docs: https://github.com/winstonkoh87/Athena-Public")
+    safe_print("📚 Docs: https://github.com/winstonkoh87/Athena-Public")
     return True
 
 
