@@ -1,0 +1,77 @@
+// PR submitted as issue #26 on 03/02/2026@1015 EST
+
+# Title
+**PR: Windows PowerShell Compatibility for CLI Output**
+
+## Summary
+This PR adds Windows PowerShell compatibility for the Athena CLI, fixing UnicodeEncodeError when running `athena check` and other commands in Kilo Code terminal on Windows.
+
+## The Problem
+When running Athena CLI commands (like `athena check`) in Kilo Code's integrated terminal on Windows, users encountered:
+- `UnicodeEncodeError: 'charmap' codec can't encode character...`
+- The error occurred because Windows PowerShell uses cp1252 encoding by default, which doesn't support many emojis and Unicode characters used in the CLI output
+
+edit: discovered MANY other files have the same issue as this file. creating separate branch 
+
+## What We Tried
+1. **Initial approach**: Tried using Git rebase to sync with upstream - failed due to 40+ merge conflicts
+2. **Second approach**: Git merge - failed due to "unrelated histories" (local fork was disconnected from original for privacy)
+3. **Final approach**: Git reset to upstream + cherry-pick our changes - worked cleanly
+
+## What We Did
+1. **`supports_unicode()` function** - Detects if terminal supports Unicode by checking:
+   - Platform (Windows vs others)
+   - Console encoding (cp1252, cp437 = no Unicode)
+   - PYTHONIOENCODING environment variable
+
+2. **`safe_print()` function** - Drop-in replacement for `print()` that:
+   - Checks if Unicode is supported
+   - If not, replaces emojis with ASCII equivalents
+   - Mappings: 🩺→[CHECK], ✅→[OK], ⚠️→[WARNING], ❌→[ERROR], 🔑→[KEY], 📚→[DOCS]
+
+3. **UI divider fallback** - In `boot/loaders/ui.py`:
+   - Uses Unicode "─" character on normal terminals
+   - Falls back to ASCII "-" on Windows cp1252/cp437
+
+4. **Updated `run_check()` command** - All emoji print statements now use `safe_print()`
+
+## Why This Approach
+- **Non-breaking**: Works on all platforms - Unicode terminals get emojis, Windows PowerShell gets ASCII
+- **Minimal code changes**: Only added new functions, didn't rewrite existing code
+- **Extensible**: Easy to add more emoji mappings as needed
+
+## Testing
+Verified on Windows with cp1252 encoding:
+```
+[CHECK] ATHENA SYSTEM CHECK
+============================================================
+   CLI Version: 9.2.0
+   [DONE] Workspace marker: Found
+   [DONE] .agent/: Found
+   [DONE] .context/: Found
+   [DONE] .framework/: Found
+
+[KEY] Environment Variables:
+   [WARNING]  SUPABASE_URL: Not set...
+```
+
+## Files Changed
+- `src/athena/__main__.py` - Added Unicode detection + safe_print + emoji fallback
+- `src/athena/boot/loaders/ui.py` - Added ASCII fallback for UI dividers
+
+## Future Improvements
+- Could extend `safe_print()` to other CLI commands that use emojis
+- Could add detection for other Windows terminal emulators
+- Could add user option to force ASCII mode regardless of detection
+
+## Type of Change
+- [ ] Bug fix
+- [x] New feature
+- [ ] Documentation update
+- [ ] Workflow/template addition
+
+## Checklist
+- [x] I have read the CONTRIBUTING.md guidelines
+- [x] My code follows the project's style (modular, <500 lines per file)
+- [x] I have tested my changes
+- [x] I have updated relevant documentation (if applicable)
