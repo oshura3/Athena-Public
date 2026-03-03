@@ -6,6 +6,38 @@ This file provides persistent context to any AI coding agent working in this wor
 
 ---
 
+## Oscar's Context
+
+### About This Workspace
+
+- **Project**: PJ - VA Benefits Digital Brain
+- **Purpose**: AI assistant for veterans' VA claims (vital work — lives depend on accuracy)
+- **Non-negotiable**: Zero hallucinations — legal citations must be real, verified
+
+### Oscar's Working Preferences (Priority Order)
+
+1. **Explain step-by-step** — I'm learning and want to eventually do more independently
+2. **Checkpoint frequently** — ADHD-friendly; context loss is stressful
+3. **Document everything** — If I have to come back weeks/months later to re-setup, I shouldn't start from scratch
+4. **ALWAYS use Windows/PowerShell commands** — Never use Linux commands (bash, rm, cp, mv, sed, grep, cat, etc.) — this is a Windows 11 machine running VS Code with Kilo Code extension
+
+### Oscar's Operational Rules
+
+- Ask before executing git commands — I'm still learning git
+- No "ship it" without full explanation
+- Break complex tasks into small steps
+- Verify all citations before presenting — veterans' benefits are at stake
+- Privacy first — Never commit/push files with PII, API keys, or sensitive info. Always review diffs before pushing.
+
+### Current Goals
+
+- [ ] Merge workspace knowledge from both repos
+- [ ] Set up GitHub workflows for upstream updates
+- [ ] Complete Kilo Code integration
+- [ ] Update user profile with any changes
+
+---
+
 ## Docs Index (Compressed)
 
 ```text
@@ -79,6 +111,8 @@ When working on any task in this workspace:
 - ❌ Ignoring existing protocols/patterns in `.agent/skills/protocols/`
 - ❌ Skipping `/start` boot sequence
 - ❌ Not filing insights on `/end`
+- ❌ Using Linux commands (bash, rm, cp, mv, sed, grep, cat, etc.) on Windows — always use PowerShell equivalents
+- ❌ Committing/pushing files with sensitive info (PII, API keys, secrets) without reviewing diffs first
 
 ---
 
@@ -100,5 +134,8 @@ The rules above are the essential subset of Protocol 413 (Multi-Agent Coordinati
 ## Version
 
 - **Framework**: v8.2-stable
-- **Last Updated**: 2026-02-21
-- **Pattern Source**: Vercel "AGENTS.md vs Skills" Research + OpenClaw Multi-Agent Safety Rules
+- **Last Updated**: 2026-03-03
+- **Added**: 
+  - Oscar's workspace context (Step 1 of iterative AGENTS.md customization)
+  - Windows/PowerShell command rule (anti-pattern)
+  - Privacy protection (anti-pattern)
