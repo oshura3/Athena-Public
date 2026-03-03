@@ -1,10 +1,23 @@
 # Athena Changelog
 
-> **Last Updated**: 02 March 2026
+> **Last Updated**: 03 March 2026
 
 This document provides detailed release notes. For the brief summary, see the README changelog.
 
 > **Note**: Versions v1.0–v1.6 predate the v8.x versioning scheme adopted in January 2026. The version jump reflects a complete architectural rewrite, not skipped releases.
+
+---
+
+## v9.3.1 (03 March 2026)
+
+**Cross-Model Audit Fixes**: Resolved 4 missing GitHub releases (v9.2.7–v9.3.0), corrected stale file count claims, relocated Windows compatibility section, synced dates.
+
+### Key Changes
+
+- **File Count Correction** (`README.md`): Updated "370+ Markdown" → "350+" (actual: 354) and "230+ Python scripts" → "600+" (actual: 651). Counts drifted after v9.2.9 dead-skill pruning.
+- **Windows Section Relocation** (`README.md`): Moved dangling `## Windows Compatibility` from below the footer into a collapsible `<details>` block under Quickstart.
+- **GitHub Release Sync**: Created v9.3.1 release covering v9.2.7–v9.3.0 changelog summaries.
+- **Date Sync**: Updated README and CHANGELOG dates to 03 March 2026.
 
 ---
 
