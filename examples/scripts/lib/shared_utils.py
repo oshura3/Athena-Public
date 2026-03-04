@@ -46,8 +46,8 @@ def get_supabase_client():
 
 # --- AI & EMBEDDINGS ---
 @lru_cache(maxsize=128)
-def _get_embedding_cached(text_hash: str, text: str, api_key: str) -> tuple:
-    """Internal cached embedding function."""
+def _get_embedding_cached_gemini(text_hash: str, text: str, api_key: str) -> tuple:
+    """Internal cached embedding function for Gemini."""
     url = f"https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key={api_key}"
     payload = {
         "model": "models/text-embedding-004",
@@ -58,12 +58,54 @@ def _get_embedding_cached(text_hash: str, text: str, api_key: str) -> tuple:
     return tuple(response.json()["embedding"]["values"])
 
 
-def get_embedding(text: str):
-    """Gemini-powered semantic embedding with LRU cache."""
-    env = load_athena_env()
-    text_hash = hashlib.md5(text.encode()).hexdigest()
-    result = _get_embedding_cached(text_hash, text, env["GOOGLE_API_KEY"])
-    return list(result)
+def _get_embedding_ollama(text: str, model: str = "nomic-embed-text") -> list:
+    """Ollama embedding (no caching here - handled by vectors.py when imported)."""
+    url = os.getenv("OLLAMA_URL", "http://localhost:11434")
+    
+    try:
+        response = requests.post(
+            f"{url}/api/embeddings",
+            json={"model": model, "prompt": text[:8192]},
+            timeout=120
+        )
+    except requests.exceptions.ConnectionError:
+        raise ConnectionError(
+            f"Cannot connect to Ollama at {url}. "
+            "Make sure Ollama is running (ollama serve or Ollama app)."
+        )
+    
+    if response.status_code == 404:
+        raise ValueError(
+            f"Model '{model}' not found in Ollama. "
+            f"Run: ollama pull {model}"
+        )
+    
+    response.raise_for_status()
+    return response.json()["embedding"]
+
+
+def get_embedding(text: str, provider: str = None):
+    """Unified embedding with provider selection.
+    
+    Args:
+        text: Text to embed
+        provider: "gemini", "ollama", or None (auto-detect from EMBEDDING_PROVIDER env var)
+        
+    Returns:
+        List of floats representing the embedding vector
+    """
+    if provider is None:
+        provider = os.getenv("EMBEDDING_PROVIDER", "gemini").lower()
+    
+    if provider == "ollama":
+        model = os.getenv("OLLAMA_MODEL", "nomic-embed-text")
+        return _get_embedding_ollama(text, model)
+    else:
+        # Default to Gemini
+        env = load_athena_env()
+        text_hash = hashlib.md5(text.encode()).hexdigest()
+        result = _get_embedding_cached_gemini(text_hash, text, env["GOOGLE_API_KEY"])
+        return list(result)
 
 
 # --- COMPLIANCE ---

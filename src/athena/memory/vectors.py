@@ -116,18 +116,47 @@ def _hash_text(text: str) -> str:
     return hashlib.md5(text.encode()).hexdigest()
 
 
-def get_embedding(text: str) -> List[float]:
+def get_embedding(text: str, provider: str = None) -> List[float]:
     """Generate embedding with persistent disk caching.
 
-    Uses gemini-embedding-001 (3072 dimensions).
+    Supports both Google Gemini (cloud) and Ollama (local) providers.
+    
+    Args:
+        text: The text to embed
+        provider: "gemini", "ollama", or None (auto-detect from env)
+        
+    Returns:
+        List of floats representing the embedding vector
     """
+    # Check cache first (regardless of provider)
     text_hash = _hash_text(text)
     cache = get_embedding_cache()
     cached = cache.get(text_hash)
     if cached:
         return cached
+    
+    # Auto-detect provider from environment
+    if provider is None:
+        provider = os.getenv("EMBEDDING_PROVIDER", "gemini").lower()
+    
+    # Route to appropriate implementation
+    if provider == "ollama":
+        embedding = _get_embedding_ollama(text)
+    elif provider == "gemini":
+        embedding = _get_embedding_gemini(text)
+    else:
+        raise ValueError(f"Unknown embedding provider: {provider}. Use 'gemini' or 'ollama'.")
+    
+    # Cache and return
+    cache.set(text_hash, embedding)
+    return embedding
 
-    # Fetch remote (Gemini) - Lazy load requests
+
+def _get_embedding_gemini(text: str) -> List[float]:
+    """Generate embedding using Google Gemini API.
+    
+    Uses gemini-embedding-001 (768 or 3072 dimensions depending on task_type).
+    """
     import requests
     from dotenv import load_dotenv
 
@@ -135,7 +164,7 @@ def get_embedding(text: str) -> List[float]:
 
     api_key = os.getenv("GOOGLE_API_KEY")
     if not api_key:
-        raise ValueError("GOOGLE_API_KEY missing.")
+        raise ValueError("GOOGLE_API_KEY missing. Set it in your .env file or switch to Ollama provider.")
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key={api_key}"
     payload = {
@@ -145,10 +174,52 @@ def get_embedding(text: str) -> List[float]:
 
     response = requests.post(url, json=payload, timeout=30)
     response.raise_for_status()
-    embedding = response.json()["embedding"]["values"]
+    return response.json()["embedding"]["values"]
 
-    cache.set(text_hash, embedding)
-    return embedding
+
+def _get_embedding_ollama(text: str) -> List[float]:
+    """Generate embedding using local Ollama instance.
+    
+    Supports any Ollama embedding model (nomic-embed-text, mxbai-embed-large, etc.)
+    Defaults to 768-dimensional embeddings compatible with Athena's schema.
+    
+    Requires:
+        - Ollama running on localhost:11434 (or OLLAMA_URL env var)
+        - Model pulled and available (default: nomic-embed-text)
+        
+    Raises:
+        ConnectionError: If Ollama is not running
+        ValueError: If model is not found
+    """
+    import requests
+    
+    url = os.getenv("OLLAMA_URL", "http://localhost:11434")
+    model = os.getenv("OLLAMA_MODEL", "nomic-embed-text")
+    
+    # Ollama embeddings endpoint
+    try:
+        response = requests.post(
+            f"{url}/api/embeddings",
+            json={
+                "model": model,
+                "prompt": text[:8192]  # Truncate if needed (model dependent)
+            },
+            timeout=120  # Local models can be slow on CPU
+        )
+    except requests.exceptions.ConnectionError:
+        raise ConnectionError(
+            f"Cannot connect to Ollama at {url}. "
+            "Make sure Ollama is running (ollama serve or Ollama app)."
+        )
+    
+    if response.status_code == 404:
+        raise ValueError(
+            f"Model '{model}' not found in Ollama. "
+            f"Run: ollama pull {model}"
+        )
+    
+    response.raise_for_status()
+    return response.json()["embedding"]
 
 
 def search_rpc(
